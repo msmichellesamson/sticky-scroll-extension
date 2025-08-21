@@ -1,0 +1,251 @@
+/* Popup Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.popup-container {
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin: 0;
+}
+
+/* Header */
+.popup-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.popup-header h1 {
+  font-size: 24px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.popup-header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Main Content */
+.popup-main {
+  padding: 20px;
+}
+
+/* Status Section */
+.status-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.status-item:last-child {
+  margin-bottom: 0;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.status-value {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: #e9ecef;
+  border-radius: 12px;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Controls Section */
+.controls-section {
+  margin-bottom: 20px;
+}
+
+.primary-btn, .secondary-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.secondary-btn {
+  background: #f8f9fa;
+  color: #666;
+  border: 2px solid #e9ecef;
+}
+
+.secondary-btn:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* Help Section */
+.help-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.help-section h3 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.help-section ol {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+  padding-left: 18px;
+}
+
+.help-section li {
+  margin-bottom: 5px;
+}
+
+/* Features Section */
+.features-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.features-section h3 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.features-section ul {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+  list-style: none;
+  padding: 0;
+}
+
+.features-section li {
+  margin-bottom: 5px;
+  padding-left: 0;
+}
+
+/* Footer */
+.popup-footer {
+  background: #f8f9fa;
+  padding: 15px 20px;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+}
+
+.popup-footer p {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Button States */
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+.secondary-btn:active {
+  transform: translateY(0);
+}
+
+/* Loading states */
+.btn-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-loading::after {
+  content: "...";
+  animation: loading 1s infinite;
+}
+
+@keyframes loading {
+  0%, 33% { content: "."; }
+  34%, 66% { content: ".."; }
+  67%, 100% { content: "..."; }
+}
+
+/* Status indicators */
+.status-value.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-value.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Scrollbar for popup */
+.popup-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.popup-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.popup-container::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}

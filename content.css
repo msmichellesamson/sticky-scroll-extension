@@ -1,0 +1,619 @@
+/* Sticky Scroll Extension Styles */
+
+/* Expandable Control Panel */
+#sticky-scroll-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main Toggle Button (Always Visible) */
+.main-toggle {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.main-toggle:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.main-icon {
+  font-size: 24px;
+  transition: transform 0.3s ease;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+#sticky-scroll-controls.expanded .main-icon {
+  transform: rotate(45deg);
+}
+
+/* Expanded Panel */
+.expanded-panel {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 56px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#sticky-scroll-controls.expanded .expanded-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* Control Buttons */
+.control-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  position: relative;
+}
+
+.control-btn:last-child {
+  margin-bottom: 0;
+}
+
+.control-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-icon {
+  font-size: 18px;
+  transition: all 0.2s ease;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Mode Button States - Radio Button Behavior */
+.mode-btn.mode-active {
+  background: linear-gradient(135deg, #FFC107, #FF9800) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4) !important;
+  transform: scale(1.05) !important;
+}
+
+.mode-btn.mode-active .btn-icon {
+  transform: scale(1.1) !important;
+}
+
+.mode-btn.mode-inactive {
+  background: transparent !important;
+  color: #666 !important;
+  box-shadow: none !important;
+  transform: scale(1) !important;
+}
+
+.mode-btn.mode-inactive:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #333 !important;
+}
+
+/* Selection Toggle Button States */
+#sticky-scroll-toggle.selection-inactive {
+  background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+  color: white !important;
+}
+
+#sticky-scroll-toggle.selection-inactive:hover {
+  background: linear-gradient(135deg, #5a6268, #495057) !important;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3) !important;
+}
+
+#sticky-scroll-toggle.selection-active {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4) !important;
+  animation: pulse 2s infinite !important;
+}
+
+/* Clear Button */
+.clear-btn {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+
+.clear-btn:hover {
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+/* Separator */
+.separator {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 8px 8px;
+}
+
+/* Collapsed State */
+#sticky-scroll-controls.collapsed .expanded-panel {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Remove old unused styles */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #sticky-scroll-controls {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .main-toggle {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .main-icon {
+    font-size: 20px;
+  }
+  
+  .control-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .btn-icon {
+    font-size: 16px;
+  }
+}
+
+/* Selection Mode Overlay */
+#sticky-scroll-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.sticky-scroll-instructions {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: #333;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+  pointer-events: none;
+}
+
+/* Element Highlighting */
+.sticky-scroll-highlight {
+  outline: 3px solid #4CAF50 !important;
+  outline-offset: 2px !important;
+  background: rgba(76, 175, 80, 0.1) !important;
+  cursor: pointer !important;
+}
+
+/* Original Element Indicators */
+.sticky-scroll-pinned {
+  position: relative;
+}
+
+.sticky-scroll-pinned::before {
+  content: "📝";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #4CAF50;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.sticky-scroll-top-pinned {
+  position: relative;
+}
+
+.sticky-scroll-top-pinned::before {
+  content: "📌";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #FF6B35;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Sticky Scroll Elements (Fixed Positioning) */
+.sticky-scroll-pinned {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 999999 !important; /* High z-index but not max */
+  background: white !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  transition: all 0.3s ease !important;
+  padding: 10px 20px !important;
+  box-sizing: border-box !important;
+  backdrop-filter: blur(5px) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Close button for sticky elements */
+.sticky-element-close {
+  position: absolute !important;
+  top: 5px !important;
+  right: 5px !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: #ff4444 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.2s !important;
+  opacity: 0.8 !important;
+}
+
+.sticky-element-close:hover {
+  background: #cc3333 !important;
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+}
+
+/* Ensure sticky elements maintain their styling */
+.sticky-scroll-pinned * {
+  position: relative !important;
+}
+
+/* Placeholder for pinned elements */
+.sticky-scroll-placeholder {
+  background: rgba(255, 107, 53, 0.1) !important;
+  border: 2px dashed #FF6B35 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #FF6B35 !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  margin: 10px 0 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.sticky-scroll-placeholder:hover {
+  background: rgba(255, 107, 53, 0.2) !important;
+  transform: scale(1.02) !important;
+}
+
+/* Sticky Note Container (Pure Floating Notes) */
+.sticky-note-container {
+  position: fixed;
+  top: 120px;
+  left: 120px;
+  min-width: 250px;
+  max-width: 400px;
+  background: #fefefe;
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+  z-index: 999999;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  animation: noteSlideIn 0.3s ease-out;
+}
+
+@keyframes noteSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Sticky Element Container (Old Style - for compatibility) */
+.sticky-element-container {
+  position: fixed;
+  top: 100px;
+  left: 100px;
+  min-width: 200px;
+  max-width: 400px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9998;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* Sticky Note Header */
+.sticky-note-header {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+  padding: 12px 15px;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+  color: white;
+  font-weight: 600;
+}
+
+.sticky-note-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.sticky-note-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.sticky-note-content {
+  padding: 15px;
+  max-height: 350px;
+  overflow: auto;
+  background: #fefefe;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Sticky Element Header (Old Style) */
+.sticky-element-header {
+  background: #f5f5f5;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+}
+
+.sticky-element-title {
+  font-weight: bold;
+  font-size: 12px;
+  color: #333;
+}
+
+.sticky-element-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.sticky-control-btn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: #ddd;
+  color: #666;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.sticky-control-btn:hover {
+  background: #ccc;
+}
+
+.sticky-control-btn[data-action="close"]:hover {
+  background: #ff4444;
+  color: white;
+}
+
+/* Sticky Element Content */
+.sticky-element-content {
+  padding: 15px;
+  max-height: 300px;
+  overflow: auto;
+  background: white;
+}
+
+/* Content Styling Adjustments */
+.sticky-element-content * {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.sticky-element-content img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.sticky-element-content table {
+  font-size: 12px !important;
+}
+
+.sticky-element-content p, 
+.sticky-element-content div, 
+.sticky-element-content span {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+
+/* Scrollbar Styling for Content */
+.sticky-element-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sticky-element-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.sticky-element-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.sticky-element-content::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .sticky-element-container {
+    max-width: 90vw;
+    max-height: 50vh;
+  }
+  
+  #sticky-scroll-toggle {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .sticky-scroll-instructions {
+    max-width: 250px;
+    font-size: 12px;
+  }
+}
+
+/* Animation for sticky elements */
+.sticky-element-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Prevent conflicts with page styles */
+.sticky-element-container,
+.sticky-element-container * {
+  box-sizing: border-box !important;
+}
+
+/* PDF-specific enhancements */
+body.pdf-viewer #sticky-scroll-toggle,
+embed[type="application/pdf"] ~ #sticky-scroll-toggle {
+  background: #FF6B35 !important;
+}
+
+/* Better handling of PDF text selections */
+.sticky-element-content .textLayer {
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+}
+
+/* PDF.js specific styling */
+#viewer .sticky-scroll-highlight {
+  outline: 2px solid #FF6B35 !important;
+  background: rgba(255, 107, 53, 0.1) !important;
+}
+
+/* Chrome PDF viewer specific */
+embed[type="application/pdf"] {
+  pointer-events: auto !important;
+}
+
+/* Enhanced visibility for PDF mode */
+.pdf-mode .sticky-scroll-instructions {
+  background: #FF6B35;
+}
+
+.pdf-mode .sticky-scroll-instructions::before {
+  content: "📄 PDF Mode: ";
+  font-weight: bold;
+}
+
+/* Better text rendering in pinned PDF content */
+.sticky-element-content canvas,
+.sticky-element-content svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* PDF selection improvements */
+.sticky-element-content .page {
+  margin: 0 !important;
+  padding: 5px !important;
+}
+
+/* Handle PDF.js annotations */
+.sticky-element-content .annotationLayer {
+  display: none !important;
+}

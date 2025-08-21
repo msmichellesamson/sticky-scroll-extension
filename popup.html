@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticky Scroll</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <h1>📌 Sticky Scroll</h1>
+      <p>Pin any element while scrolling</p>
+    </header>
+
+    <main class="popup-main">
+      <div class="status-section">
+        <div class="status-item">
+          <span class="status-label">Active Elements:</span>
+          <span class="status-value" id="sticky-count">0</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Selection Mode:</span>
+          <span class="status-value" id="selection-status">Off</span>
+        </div>
+      </div>
+
+      <div class="controls-section">
+        <button id="toggle-selection" class="primary-btn">
+          <span class="btn-icon">🎯</span>
+          Toggle Selection Mode
+        </button>
+        
+        <button id="clear-all" class="secondary-btn">
+          <span class="btn-icon">🗑️</span>
+          Clear All Pins
+        </button>
+      </div>
+
+      <div class="help-section">
+        <h3>How to use:</h3>
+        <ol>
+          <li>Click "Toggle Selection Mode" or the 🎯 button on the page</li>
+          <li>Choose your mode: 📝 Sticky Notes or 📌 Sticky Scroll</li>
+          <li>Hover over any element you want to pin</li>
+          <li><strong>Sticky Notes:</strong> Creates draggable floating notes</li>
+          <li><strong>Sticky Scroll:</strong> Pins elements to top of page</li>
+        </ol>
+      </div>
+
+      <div class="features-section">
+        <h3>Two Modes:</h3>
+        <ul>
+          <li>📝 <strong>Sticky Notes:</strong> Copy content into draggable notes</li>
+          <li>📌 <strong>Sticky Scroll:</strong> Pin elements to top while scrolling</li>
+          <li>✅ Works on all websites including PDFs</li>
+          <li>✅ Visual indicators on original elements</li>
+          <li>✅ Easy management with clear buttons</li>
+        </ul>
+      </div>
+    </main>
+
+    <footer class="popup-footer">
+      <p>Made with ❤️ for better browsing</p>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
