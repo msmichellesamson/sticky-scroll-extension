@@ -1,3 +1,4 @@
+
 # Sticky Scroll Chrome Extension
 
 A Chrome extension with **two powerful modes** for keeping important content visible while browsing. Perfect for reading long documents, PDFs, research, and comparing information across different parts of a page.
@@ -190,3 +191,4 @@ MIT License - Feel free to modify and distribute.
 ---
 
 **Made with ❤️ for better browsing experiences**
+
