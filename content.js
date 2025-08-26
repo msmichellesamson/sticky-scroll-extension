@@ -445,15 +445,17 @@ class StickyScrollManager {
     const topOffset = baseTopOffset + stackOffset;
     
     // Make the original element fixed to top of viewport
-    originalElement.style.position = 'fixed';
-    originalElement.style.top = topOffset + 'px';
-    originalElement.style.left = '0px';
-    originalElement.style.width = '100%';
-    originalElement.style.zIndex = '9998';
-    originalElement.style.background = originalElement.style.background || 'white';
-    originalElement.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-    originalElement.style.borderBottom = '1px solid #e0e0e0';
-    originalElement.style.padding = originalElement.style.padding || '10px 20px';
+    originalElement.style.setProperty('position', 'fixed', 'important');
+    originalElement.style.setProperty('top', topOffset + 'px', 'important');
+    originalElement.style.setProperty('left', '0px', 'important');
+    originalElement.style.setProperty('width', '100%', 'important');
+    originalElement.style.setProperty('z-index', '9998', 'important');
+    originalElement.style.setProperty('background', originalElement.style.background || 'rgba(255, 255, 255, 0.95)', 'important');
+    originalElement.style.setProperty('box-shadow', '0 2px 10px rgba(0,0,0,0.1)', 'important');
+    originalElement.style.setProperty('border-bottom', '1px solid #e0e0e0', 'important');
+    originalElement.style.setProperty('padding', originalElement.style.padding || '10px 20px', 'important');
+    
+    console.log(`🔧 Pinning element to top: ${topOffset}px (base: ${baseTopOffset}px, stack: ${stackOffset}px)`);
     
     // Add classes for styling and accessibility
     originalElement.classList.add('sticky-scroll-pinned');
@@ -661,7 +663,8 @@ class StickyScrollManager {
     
     this.stickyScrollElements.forEach((stickyData) => {
       const topOffset = baseOffset + (index * 60); // 60px per element
-      stickyData.element.style.top = topOffset + 'px';
+      stickyData.element.style.setProperty('top', topOffset + 'px', 'important');
+      console.log(`🔄 Repositioning pinned element #${index + 1} to: ${topOffset}px`);
       index++;
     });
   }
