@@ -413,6 +413,10 @@ class StickyScrollManager {
     
     const elementId = `sticky-scroll-element-${++this.elementCounter}`;
     
+    // NUCLEAR OPTION: Clone element and move to body to avoid ALL parent interference
+    const clonedElement = originalElement.cloneNode(true);
+    clonedElement.id = elementId + '-clone';
+    
     // Store original position and styling
     const originalPosition = originalElement.style.position;
     const originalTop = originalElement.style.top;
@@ -444,17 +448,18 @@ class StickyScrollManager {
     const stackOffset = this.stickyScrollElements.size * 60; // Stack elements with 60px offset
     const topOffset = baseTopOffset + stackOffset;
     
-    // AGGRESSIVE pinning to top of viewport with maximum override power
+    // NUCLEAR APPROACH: Style the CLONED element with maximum override power
     const aggressiveStyles = {
       'position': 'fixed',
       'top': topOffset + 'px',
       'left': '0px',
       'right': '0px',
-      'width': '100%',
-      'z-index': '999999',
+      'width': '100vw',
+      'z-index': '2147483647',
       'background': 'rgba(255, 255, 255, 0.98)',
       'box-shadow': '0 4px 20px rgba(0,0,0,0.2)',
       'border-bottom': '2px solid #007cba',
+      'border-top': '5px solid red',
       'padding': '15px 20px',
       'margin': '0',
       'display': 'block',
@@ -463,66 +468,29 @@ class StickyScrollManager {
       'transform': 'none',
       'min-height': 'auto',
       'max-height': 'none',
-      'overflow': 'visible'
+      'overflow': 'visible',
+      'box-sizing': 'border-box'
     };
     
-    // Apply each style with maximum importance
+    // Apply styles to the CLONED element (which has no parent interference)
     Object.entries(aggressiveStyles).forEach(([prop, value]) => {
-      originalElement.style.setProperty(prop, value, 'important');
+      clonedElement.style.setProperty(prop, value, 'important');
     });
     
-    // CRITICAL: Ensure parent elements don't create containing blocks
-    let parent = originalElement.parentElement;
-    while (parent && parent !== document.body) {
-      const parentStyle = window.getComputedStyle(parent);
-      
-      // Check for properties that create containing blocks for fixed elements
-      if (parentStyle.transform !== 'none' || 
-          parentStyle.perspective !== 'none' ||
-          parentStyle.willChange === 'transform' ||
-          parentStyle.filter !== 'none' ||
-          parentStyle.contain && parentStyle.contain !== 'none') {
-        
-        console.log(`🚨 WARNING: Parent element creates containing block:`, {
-          element: parent.tagName + (parent.className ? '.' + parent.className.split(' ')[0] : ''),
-          transform: parentStyle.transform,
-          perspective: parentStyle.perspective,
-          willChange: parentStyle.willChange,
-          filter: parentStyle.filter,
-          contain: parentStyle.contain
-        });
-        
-        // Try to fix the parent
-        if (parentStyle.transform !== 'none') {
-          parent.style.setProperty('transform', 'none', 'important');
-          console.log(`🔧 Fixed parent transform`);
-        }
-        if (parentStyle.willChange === 'transform') {
-          parent.style.setProperty('will-change', 'auto', 'important');
-          console.log(`🔧 Fixed parent will-change`);
-        }
-      }
-      
-      parent = parent.parentElement;
-    }
+    // Add to document.body to avoid ALL parent CSS interference
+    document.body.appendChild(clonedElement);
     
-    // FORCE remove any conflicting classes from the page
-    originalElement.classList.remove('d-none', 'hidden', 'invisible', 'sr-only');
+    // Hide the original element (replace with placeholder)
+    originalElement.style.setProperty('display', 'none', 'important');
     
-    console.log(`🔧 AGGRESSIVE PINNING: ${topOffset}px (base: ${baseTopOffset}px, stack: ${stackOffset}px)`);
-    console.log(`🔧 Element after styling:`, {
-      position: originalElement.style.position,
-      top: originalElement.style.top,
-      zIndex: originalElement.style.zIndex,
-      display: originalElement.style.display,
-      visibility: originalElement.style.visibility
-    });
+    console.log(`🔧 NUCLEAR PINNING: ${topOffset}px (base: ${baseTopOffset}px, stack: ${stackOffset}px)`);
+    console.log(`🔧 Using cloned element attached to body to avoid parent interference`);
     
-    // DEBUG: Check computed styles after a brief delay AND during scroll
+    // DEBUG: Check CLONED element positioning after a brief delay AND during scroll
     setTimeout(() => {
-      const computed = window.getComputedStyle(originalElement);
-      const rect = originalElement.getBoundingClientRect();
-      console.log(`🔍 DEBUG: Element computed styles:`, {
+      const computed = window.getComputedStyle(clonedElement);
+      const rect = clonedElement.getBoundingClientRect();
+      console.log(`🔍 DEBUG: CLONED element computed styles:`, {
         position: computed.position,
         top: computed.top,
         left: computed.left,
@@ -531,7 +499,7 @@ class StickyScrollManager {
         visibility: computed.visibility,
         opacity: computed.opacity
       });
-      console.log(`🔍 DEBUG: Element bounding rect:`, {
+      console.log(`🔍 DEBUG: CLONED element bounding rect:`, {
         top: rect.top,
         left: rect.left,
         width: rect.width,
@@ -540,24 +508,24 @@ class StickyScrollManager {
       });
       
       if (rect.top > 100) {
-        console.error(`🚨 PROBLEM: Element is positioned at ${rect.top}px instead of ${topOffset}px!`);
+        console.error(`🚨 PROBLEM: CLONED element is positioned at ${rect.top}px instead of ${topOffset}px!`);
       } else {
-        console.log(`✅ SUCCESS: Element correctly positioned at top!`);
+        console.log(`✅ SUCCESS: CLONED element correctly positioned at top!`);
       }
       
       // Test scroll behavior
-      console.log(`📜 SCROLL TEST: Please scroll down and see if element stays at top...`);
+      console.log(`📜 SCROLL TEST: Please scroll down and see if cloned element stays at top...`);
       
       // Add scroll listener to debug scroll behavior
       const scrollListener = () => {
-        const rectDuringScroll = originalElement.getBoundingClientRect();
-        console.log(`📜 DURING SCROLL: Element at ${rectDuringScroll.top}px (should stay at ${topOffset}px)`);
+        const rectDuringScroll = clonedElement.getBoundingClientRect();
+        console.log(`📜 DURING SCROLL: CLONED element at ${rectDuringScroll.top}px (should stay at ${topOffset}px)`);
         
         // Re-enforce positioning if it moves
         if (Math.abs(rectDuringScroll.top - topOffset) > 5) {
-          console.log(`🔧 RE-FIXING: Element moved to ${rectDuringScroll.top}px, re-applying position`);
-          originalElement.style.setProperty('position', 'fixed', 'important');
-          originalElement.style.setProperty('top', topOffset + 'px', 'important');
+          console.log(`🔧 RE-FIXING: CLONED element moved to ${rectDuringScroll.top}px, re-applying position`);
+          clonedElement.style.setProperty('position', 'fixed', 'important');
+          clonedElement.style.setProperty('top', topOffset + 'px', 'important');
         }
       };
       
@@ -572,32 +540,35 @@ class StickyScrollManager {
       }, 30000);
     }, 100);
     
-    // Add classes for styling and accessibility
-    originalElement.classList.add('sticky-scroll-pinned');
-    originalElement.classList.add('sticky-scroll-original');
-    originalElement.setAttribute('data-sticky-id', elementId);
+    // Add classes for styling and accessibility to CLONED element
+    clonedElement.classList.add('sticky-scroll-pinned');
+    clonedElement.classList.add('sticky-scroll-original');
+    clonedElement.setAttribute('data-sticky-id', elementId);
     
-    // Create a small indicator/close button
+    // Add accessibility visual feedback to original element
+    originalElement.classList.add('sticky-scroll-original');
+    
+    // Create a small indicator/close button for CLONED element
     const closeBtn = document.createElement('button');
     closeBtn.className = 'sticky-element-close';
     closeBtn.innerHTML = '×';
     closeBtn.title = 'Unpin element';
     closeBtn.style.cssText = `
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 20px;
-      height: 20px;
-      background: #ff4444;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 12px;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute !important;
+      top: 5px !important;
+      right: 5px !important;
+      width: 20px !important;
+      height: 20px !important;
+      background: #ff4444 !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 50% !important;
+      cursor: pointer !important;
+      font-size: 12px !important;
+      z-index: 2147483647 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     `;
     
     closeBtn.addEventListener('click', (e) => {
@@ -606,12 +577,14 @@ class StickyScrollManager {
       this.removeStickyScrollElement(elementId);
     });
     
-    originalElement.style.position = 'relative';
-    originalElement.appendChild(closeBtn);
+    // Attach close button to CLONED element
+    clonedElement.style.position = 'relative';
+    clonedElement.appendChild(closeBtn);
     
-    // Store reference with original styling
+    // Store reference with CLONED element and original element
     this.stickyScrollElements.set(elementId, {
-      element: originalElement,
+      element: clonedElement,  // Track the cloned element (what's actually pinned)
+      originalElement: originalElement,  // Track original for cleanup
       placeholder: placeholder,
       closeBtn: closeBtn,
       originalStyles: {
@@ -622,16 +595,14 @@ class StickyScrollManager {
         zIndex: originalZIndex,
         background: originalBackground,
         padding: originalPadding
-      }
+      },
+      type: 'scroll'
     });
-    
-    // Add visual indicator
-    originalElement.classList.add('sticky-scroll-top-pinned');
     
     // Save to storage
     this.saveStickyElements();
     
-    console.log(`Element pinned with ID: ${elementId}`);
+    console.log(`NUCLEAR: Element pinned with ID: ${elementId} (using cloned element)`);
   }
 
   removeStickyScrollElement(elementId) {
@@ -641,27 +612,29 @@ class StickyScrollManager {
       return;
     }
 
-    const element = stickyData.element;
-    const originalStyles = stickyData.originalStyles;
+    const clonedElement = stickyData.element;  // This is the cloned element at the top
+    const originalElement = stickyData.originalElement;  // This is the original element
     
-    // Restore original styling
-    element.style.position = originalStyles.position || '';
-    element.style.top = originalStyles.top || '';
-    element.style.left = originalStyles.left || '';
-    element.style.width = originalStyles.width || '';
-    element.style.zIndex = originalStyles.zIndex || '';
-    element.style.background = originalStyles.background || '';
-    element.style.padding = originalStyles.padding || '';
-    element.style.boxShadow = '';
-    element.style.borderBottom = '';
+    // Remove the CLONED element from the DOM (the one that was pinned to top)
+    if (clonedElement && clonedElement.parentNode) {
+      clonedElement.remove();
+      console.log(`🗑️ Removed cloned element from DOM`);
+    }
     
-    // Remove classes and attributes (including accessibility feedback)
-    element.classList.remove('sticky-scroll-pinned', 'sticky-scroll-top-pinned', 'sticky-scroll-original');
-    element.removeAttribute('data-sticky-id');
+    // Show the ORIGINAL element again (restore display)
+    if (originalElement) {
+      originalElement.style.removeProperty('display');
+      
+      // Remove accessibility visual feedback from original element
+      originalElement.classList.remove('sticky-scroll-original');
+      
+      console.log(`👁️ Restored original element display`);
+    }
     
     // Remove placeholder
     if (stickyData.placeholder && stickyData.placeholder.parentNode) {
       stickyData.placeholder.remove();
+      console.log(`🗑️ Removed placeholder`);
     }
     
     // Remove close button
