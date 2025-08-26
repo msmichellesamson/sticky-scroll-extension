@@ -393,11 +393,14 @@ class StickyScrollManager {
       type: 'note'
     });
     
+    // Add accessibility visual feedback to original element
+    originalElement.classList.add('sticky-noted-element');
+    
     // Save to storage
     this.saveStickyElements();
     
-    // NO visual indicator on original element for notes - just pure floating note!
-    console.log('Created pure sticky note:', elementId);
+    // Created floating note with visual feedback on original element!
+    console.log('Created sticky note with accessibility feedback:', elementId);
   }
 
   createStickyScrollElement(originalElement) {
@@ -452,8 +455,9 @@ class StickyScrollManager {
     originalElement.style.borderBottom = '1px solid #e0e0e0';
     originalElement.style.padding = originalElement.style.padding || '10px 20px';
     
-    // Add classes for styling
+    // Add classes for styling and accessibility
     originalElement.classList.add('sticky-scroll-pinned');
+    originalElement.classList.add('sticky-scroll-original');
     originalElement.setAttribute('data-sticky-id', elementId);
     
     // Create a small indicator/close button
@@ -534,8 +538,8 @@ class StickyScrollManager {
     element.style.boxShadow = '';
     element.style.borderBottom = '';
     
-    // Remove classes and attributes
-    element.classList.remove('sticky-scroll-pinned', 'sticky-scroll-top-pinned');
+    // Remove classes and attributes (including accessibility feedback)
+    element.classList.remove('sticky-scroll-pinned', 'sticky-scroll-top-pinned', 'sticky-scroll-original');
     element.removeAttribute('data-sticky-id');
     
     // Remove placeholder
@@ -829,6 +833,11 @@ class StickyScrollManager {
   removeStickyNote(elementId) {
     const stickyData = this.stickyElements.get(elementId);
     if (!stickyData || stickyData.type !== 'note') return;
+
+    // Remove accessibility visual feedback from original element
+    if (stickyData.originalElement) {
+      stickyData.originalElement.classList.remove('sticky-noted-element');
+    }
 
     // Remove container from page
     stickyData.container.remove();

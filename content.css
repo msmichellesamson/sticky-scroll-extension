@@ -617,3 +617,106 @@ embed[type="application/pdf"] {
 .sticky-element-content .annotationLayer {
   display: none !important;
 }
+
+/* =========================================
+   ACCESSIBILITY VISUAL FEEDBACK STYLES
+   ========================================= */
+
+/* Background indicator for elements that have been used to create sticky notes */
+.sticky-noted-element {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.1)) !important;
+  border-left: 4px solid rgba(255, 193, 7, 0.6) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+}
+
+.sticky-noted-element::before {
+  content: "🗒️";
+  position: absolute !important;
+  top: -8px !important;
+  left: -8px !important;
+  background: linear-gradient(135deg, #FFC107, #FF9800) !important;
+  color: white !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  z-index: 1000 !important;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4) !important;
+  border: 2px solid white !important;
+}
+
+/* Background indicator for elements that are currently pinned to scroll */
+.sticky-scroll-original {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.12), rgba(30, 136, 229, 0.08)) !important;
+  border-left: 4px solid rgba(33, 150, 243, 0.6) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+}
+
+.sticky-scroll-original::before {
+  content: "📌";
+  position: absolute !important;
+  top: -8px !important;
+  left: -8px !important;
+  background: linear-gradient(135deg, #2196F3, #1E88E5) !important;
+  color: white !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  z-index: 1000 !important;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.4) !important;
+  border: 2px solid white !important;
+}
+
+/* Hover effects for accessibility indicators */
+.sticky-noted-element:hover {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 152, 0, 0.18)) !important;
+  transform: translateX(2px) !important;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2) !important;
+}
+
+.sticky-scroll-original:hover {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.20), rgba(30, 136, 229, 0.15)) !important;
+  transform: translateX(2px) !important;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2) !important;
+}
+
+/* Ensure accessibility indicators work well with different text colors */
+.sticky-noted-element,
+.sticky-scroll-original {
+  box-sizing: border-box !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sticky-noted-element {
+    background: rgba(255, 193, 7, 0.3) !important;
+    border-left: 6px solid #FFC107 !important;
+  }
+  
+  .sticky-scroll-original {
+    background: rgba(33, 150, 243, 0.3) !important;
+    border-left: 6px solid #2196F3 !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sticky-noted-element,
+  .sticky-scroll-original {
+    transition: none !important;
+  }
+  
+  .sticky-noted-element:hover,
+  .sticky-scroll-original:hover {
+    transform: none !important;
+  }
+}
