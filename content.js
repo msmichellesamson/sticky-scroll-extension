@@ -574,26 +574,31 @@ class StickyScrollManager {
   }
 
   calculateBaseTopOffset() {
-    // Find existing fixed/sticky elements at the top of the page
+    // SIMPLIFIED: Only check for very obvious, common headers
+    // Pin to actual top (0px) by default for better user experience
     let maxBottom = 0;
     const detectedHeaders = [];
     
-    // Common header selectors to check first
-    const commonHeaderSelectors = [
-      'header', 'nav', '.header', '.navbar', '.nav', '.navigation',
-      '.top-bar', '.toolbar', '.menu-bar', '[role="banner"]'
+    // Only check VERY specific, common header selectors
+    const conservativeHeaderSelectors = [
+      'header[role="banner"]', 
+      'nav[role="navigation"]',
+      '.site-header',
+      '.main-header',
+      '.navbar-fixed-top'
     ];
     
-    // Check common header elements first
-    for (const selector of commonHeaderSelectors) {
+    // Check only obvious headers that are actually fixed at top
+    for (const selector of conservativeHeaderSelectors) {
       const elements = document.querySelectorAll(selector);
       for (const element of elements) {
         const style = window.getComputedStyle(element);
         const position = style.position;
         
-        if ((position === 'fixed' || position === 'sticky')) {
+        if (position === 'fixed') {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 100 && rect.height > 0 && rect.width > 0) {
+          // Only if it's ACTUALLY at the top (within 5px)
+          if (rect.top <= 5 && rect.height > 0 && rect.width > 0) {
             const elementBottom = rect.top + rect.height;
             if (elementBottom > maxBottom) {
               maxBottom = elementBottom;
@@ -608,52 +613,16 @@ class StickyScrollManager {
       }
     }
     
-    // If no common headers found, check all elements
-    if (maxBottom === 0) {
-      const allElements = document.querySelectorAll('*');
-      
-      for (const element of allElements) {
-        // Skip our own extension elements
-        if (element.closest('#sticky-scroll-controls') || 
-            element.classList.contains('sticky-scroll-pinned') ||
-            element.classList.contains('sticky-element-container')) {
-          continue;
-        }
-        
-        const style = window.getComputedStyle(element);
-        const position = style.position;
-        const top = parseInt(style.top) || 0;
-        
-        // Check if element is fixed or sticky and positioned at/near the top
-        if ((position === 'fixed' || position === 'sticky') && 
-            top >= -10 && top <= 10) { // Within 10px of top
-          
-          const rect = element.getBoundingClientRect();
-          
-          // Only consider elements that are actually visible and at the top
-          if (rect.top <= 100 && rect.height > 0 && rect.width > 0) {
-            const elementBottom = rect.top + rect.height;
-            if (elementBottom > maxBottom) {
-              maxBottom = elementBottom;
-              detectedHeaders.push({
-                element: element.tagName + (element.className ? '.' + element.className.split(' ')[0] : ''),
-                height: rect.height,
-                bottom: elementBottom
-              });
-            }
-          }
-        }
-      }
-    }
-    
     // Log detected headers for debugging
     if (detectedHeaders.length > 0) {
-      console.log('Sticky Scroll: Detected page headers:', detectedHeaders);
-      console.log('Sticky Scroll: Positioning pins below existing headers at offset:', maxBottom + 5);
+      console.log('🎯 Sticky Scroll: Detected genuine headers:', detectedHeaders);
+      console.log('🎯 Sticky Scroll: Positioning pins below headers at offset:', maxBottom + 5);
+    } else {
+      console.log('🎯 Sticky Scroll: No headers detected, pinning to actual top (0px)');
     }
     
-    // Add a small buffer to avoid touching existing elements
-    return Math.max(0, maxBottom + 5);
+    // Return 0 if no genuine headers found, otherwise add small buffer
+    return maxBottom > 0 ? maxBottom + 5 : 0;
   }
 
   repositionPinnedElements() {
