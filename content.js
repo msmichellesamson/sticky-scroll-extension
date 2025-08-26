@@ -444,18 +444,72 @@ class StickyScrollManager {
     const stackOffset = this.stickyScrollElements.size * 60; // Stack elements with 60px offset
     const topOffset = baseTopOffset + stackOffset;
     
-    // Make the original element fixed to top of viewport
-    originalElement.style.setProperty('position', 'fixed', 'important');
-    originalElement.style.setProperty('top', topOffset + 'px', 'important');
-    originalElement.style.setProperty('left', '0px', 'important');
-    originalElement.style.setProperty('width', '100%', 'important');
-    originalElement.style.setProperty('z-index', '9998', 'important');
-    originalElement.style.setProperty('background', originalElement.style.background || 'rgba(255, 255, 255, 0.95)', 'important');
-    originalElement.style.setProperty('box-shadow', '0 2px 10px rgba(0,0,0,0.1)', 'important');
-    originalElement.style.setProperty('border-bottom', '1px solid #e0e0e0', 'important');
-    originalElement.style.setProperty('padding', originalElement.style.padding || '10px 20px', 'important');
+    // AGGRESSIVE pinning to top of viewport with maximum override power
+    const aggressiveStyles = {
+      'position': 'fixed',
+      'top': topOffset + 'px',
+      'left': '0px',
+      'right': '0px',
+      'width': '100%',
+      'z-index': '999999',
+      'background': 'rgba(255, 255, 255, 0.98)',
+      'box-shadow': '0 4px 20px rgba(0,0,0,0.2)',
+      'border-bottom': '2px solid #007cba',
+      'padding': '15px 20px',
+      'margin': '0',
+      'display': 'block',
+      'visibility': 'visible',
+      'opacity': '1',
+      'transform': 'none',
+      'min-height': 'auto',
+      'max-height': 'none',
+      'overflow': 'visible'
+    };
     
-    console.log(`🔧 Pinning element to top: ${topOffset}px (base: ${baseTopOffset}px, stack: ${stackOffset}px)`);
+    // Apply each style with maximum importance
+    Object.entries(aggressiveStyles).forEach(([prop, value]) => {
+      originalElement.style.setProperty(prop, value, 'important');
+    });
+    
+    // FORCE remove any conflicting classes from the page
+    originalElement.classList.remove('d-none', 'hidden', 'invisible', 'sr-only');
+    
+    console.log(`🔧 AGGRESSIVE PINNING: ${topOffset}px (base: ${baseTopOffset}px, stack: ${stackOffset}px)`);
+    console.log(`🔧 Element after styling:`, {
+      position: originalElement.style.position,
+      top: originalElement.style.top,
+      zIndex: originalElement.style.zIndex,
+      display: originalElement.style.display,
+      visibility: originalElement.style.visibility
+    });
+    
+    // DEBUG: Check computed styles after a brief delay
+    setTimeout(() => {
+      const computed = window.getComputedStyle(originalElement);
+      const rect = originalElement.getBoundingClientRect();
+      console.log(`🔍 DEBUG: Element computed styles:`, {
+        position: computed.position,
+        top: computed.top,
+        left: computed.left,
+        zIndex: computed.zIndex,
+        display: computed.display,
+        visibility: computed.visibility,
+        opacity: computed.opacity
+      });
+      console.log(`🔍 DEBUG: Element bounding rect:`, {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        visible: rect.width > 0 && rect.height > 0
+      });
+      
+      if (rect.top > 100) {
+        console.error(`🚨 PROBLEM: Element is positioned at ${rect.top}px instead of ${topOffset}px!`);
+      } else {
+        console.log(`✅ SUCCESS: Element correctly positioned at top!`);
+      }
+    }, 100);
     
     // Add classes for styling and accessibility
     originalElement.classList.add('sticky-scroll-pinned');
@@ -574,55 +628,9 @@ class StickyScrollManager {
   }
 
   calculateBaseTopOffset() {
-    // SIMPLIFIED: Only check for very obvious, common headers
-    // Pin to actual top (0px) by default for better user experience
-    let maxBottom = 0;
-    const detectedHeaders = [];
-    
-    // Only check VERY specific, common header selectors
-    const conservativeHeaderSelectors = [
-      'header[role="banner"]', 
-      'nav[role="navigation"]',
-      '.site-header',
-      '.main-header',
-      '.navbar-fixed-top'
-    ];
-    
-    // Check only obvious headers that are actually fixed at top
-    for (const selector of conservativeHeaderSelectors) {
-      const elements = document.querySelectorAll(selector);
-      for (const element of elements) {
-        const style = window.getComputedStyle(element);
-        const position = style.position;
-        
-        if (position === 'fixed') {
-          const rect = element.getBoundingClientRect();
-          // Only if it's ACTUALLY at the top (within 5px)
-          if (rect.top <= 5 && rect.height > 0 && rect.width > 0) {
-            const elementBottom = rect.top + rect.height;
-            if (elementBottom > maxBottom) {
-              maxBottom = elementBottom;
-              detectedHeaders.push({
-                selector: selector,
-                height: rect.height,
-                bottom: elementBottom
-              });
-            }
-          }
-        }
-      }
-    }
-    
-    // Log detected headers for debugging
-    if (detectedHeaders.length > 0) {
-      console.log('🎯 Sticky Scroll: Detected genuine headers:', detectedHeaders);
-      console.log('🎯 Sticky Scroll: Positioning pins below headers at offset:', maxBottom + 5);
-    } else {
-      console.log('🎯 Sticky Scroll: No headers detected, pinning to actual top (0px)');
-    }
-    
-    // Return 0 if no genuine headers found, otherwise add small buffer
-    return maxBottom > 0 ? maxBottom + 5 : 0;
+    // TEMPORARY DEBUG: Always return 0 to pin to absolute top
+    console.log('🎯 DEBUGGING: Forcing pin to absolute top (0px)');
+    return 0;
   }
 
   repositionPinnedElements() {
