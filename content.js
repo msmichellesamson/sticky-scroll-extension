@@ -471,6 +471,41 @@ class StickyScrollManager {
       originalElement.style.setProperty(prop, value, 'important');
     });
     
+    // CRITICAL: Ensure parent elements don't create containing blocks
+    let parent = originalElement.parentElement;
+    while (parent && parent !== document.body) {
+      const parentStyle = window.getComputedStyle(parent);
+      
+      // Check for properties that create containing blocks for fixed elements
+      if (parentStyle.transform !== 'none' || 
+          parentStyle.perspective !== 'none' ||
+          parentStyle.willChange === 'transform' ||
+          parentStyle.filter !== 'none' ||
+          parentStyle.contain && parentStyle.contain !== 'none') {
+        
+        console.log(`🚨 WARNING: Parent element creates containing block:`, {
+          element: parent.tagName + (parent.className ? '.' + parent.className.split(' ')[0] : ''),
+          transform: parentStyle.transform,
+          perspective: parentStyle.perspective,
+          willChange: parentStyle.willChange,
+          filter: parentStyle.filter,
+          contain: parentStyle.contain
+        });
+        
+        // Try to fix the parent
+        if (parentStyle.transform !== 'none') {
+          parent.style.setProperty('transform', 'none', 'important');
+          console.log(`🔧 Fixed parent transform`);
+        }
+        if (parentStyle.willChange === 'transform') {
+          parent.style.setProperty('will-change', 'auto', 'important');
+          console.log(`🔧 Fixed parent will-change`);
+        }
+      }
+      
+      parent = parent.parentElement;
+    }
+    
     // FORCE remove any conflicting classes from the page
     originalElement.classList.remove('d-none', 'hidden', 'invisible', 'sr-only');
     
@@ -483,7 +518,7 @@ class StickyScrollManager {
       visibility: originalElement.style.visibility
     });
     
-    // DEBUG: Check computed styles after a brief delay
+    // DEBUG: Check computed styles after a brief delay AND during scroll
     setTimeout(() => {
       const computed = window.getComputedStyle(originalElement);
       const rect = originalElement.getBoundingClientRect();
@@ -509,6 +544,32 @@ class StickyScrollManager {
       } else {
         console.log(`✅ SUCCESS: Element correctly positioned at top!`);
       }
+      
+      // Test scroll behavior
+      console.log(`📜 SCROLL TEST: Please scroll down and see if element stays at top...`);
+      
+      // Add scroll listener to debug scroll behavior
+      const scrollListener = () => {
+        const rectDuringScroll = originalElement.getBoundingClientRect();
+        console.log(`📜 DURING SCROLL: Element at ${rectDuringScroll.top}px (should stay at ${topOffset}px)`);
+        
+        // Re-enforce positioning if it moves
+        if (Math.abs(rectDuringScroll.top - topOffset) > 5) {
+          console.log(`🔧 RE-FIXING: Element moved to ${rectDuringScroll.top}px, re-applying position`);
+          originalElement.style.setProperty('position', 'fixed', 'important');
+          originalElement.style.setProperty('top', topOffset + 'px', 'important');
+        }
+      };
+      
+      // Listen for scroll events
+      window.addEventListener('scroll', scrollListener);
+      document.addEventListener('scroll', scrollListener);
+      
+      // Clean up listener after 30 seconds
+      setTimeout(() => {
+        window.removeEventListener('scroll', scrollListener);
+        document.removeEventListener('scroll', scrollListener);
+      }, 30000);
     }, 100);
     
     // Add classes for styling and accessibility
