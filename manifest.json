@@ -1,39 +1,35 @@
 {
   "manifest_version": 3,
-  "name": "Sticky Scroll",
-  "version": "1.0",
-  "description": "Pin and stick any element on a webpage while scrolling through the rest of the content",
+  "name": "Sticky Scroll Extension",
+  "version": "1.0.0",
+  "description": "Makes scroll positions sticky across page reloads and navigation",
+  
   "permissions": [
+    "storage",
     "activeTab",
-    "storage"
+    "alarms"
   ],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"]
-    }
-  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "css": ["content.css"],
+    "run_at": "document_end"
+  }],
+  
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Sticky Scroll",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
+    "default_title": "Sticky Scroll Settings"
   },
+  
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["content.css"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }
