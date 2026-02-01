@@ -1,59 +1,128 @@
-// Background service worker for Chrome extension
+// Enhanced background script with proper error handling and logging
 
-// Listen for extension installation
-chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === 'install') {
-    // Set default settings
-    chrome.storage.sync.set({
-      enabled: true,
-      sensitivity: 0.5,
-      debug: false
-    });
-  }
-});
-
-// Handle messages from content script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'PERFORMANCE_METRIC') {
-    // Store performance metrics
-    const metric = {
-      timestamp: Date.now(),
-      url: sender.tab?.url,
-      scrollDistance: request.data.scrollDistance,
-      timeSpent: request.data.timeSpent,
-      elementsStuck: request.data.elementsStuck
+class ExtensionLogger {
+  static log(level, message, data = null) {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+      timestamp,
+      level,
+      message,
+      data: data ? JSON.stringify(data) : null
     };
     
-    // Store in local storage (limited retention)
-    chrome.storage.local.get(['metrics'], (result) => {
-      const metrics = result.metrics || [];
-      metrics.push(metric);
+    console[level](`[StickyScroll] ${timestamp}: ${message}`, data || '');
+    
+    // Store recent logs for debugging
+    chrome.storage.local.get(['extensionLogs'], (result) => {
+      const logs = result.extensionLogs || [];
+      logs.push(logEntry);
       
-      // Keep only last 100 metrics
-      if (metrics.length > 100) {
-        metrics.shift();
+      // Keep only last 100 logs
+      if (logs.length > 100) {
+        logs.splice(0, logs.length - 100);
       }
       
-      chrome.storage.local.set({ metrics });
+      chrome.storage.local.set({ extensionLogs: logs });
     });
-    
-    sendResponse({ success: true });
   }
   
-  return true; // Keep message channel open for async response
+  static error(message, error = null) {
+    this.log('error', message, error ? { 
+      name: error.name, 
+      message: error.message, 
+      stack: error.stack 
+    } : null);
+  }
+  
+  static warn(message, data = null) {
+    this.log('warn', message, data);
+  }
+  
+  static info(message, data = null) {
+    this.log('info', message, data);
+  }
+}
+
+// Extension lifecycle management
+chrome.runtime.onInstalled.addListener((details) => {
+  try {
+    ExtensionLogger.info('Extension installed/updated', { 
+      reason: details.reason,
+      version: chrome.runtime.getManifest().version 
+    });
+    
+    // Initialize default settings on fresh install
+    if (details.reason === 'install') {
+      chrome.storage.sync.set({
+        stickyScrollEnabled: true,
+        scrollSensitivity: 'medium',
+        enabledDomains: []
+      }, () => {
+        if (chrome.runtime.lastError) {
+          ExtensionLogger.error('Failed to initialize settings', chrome.runtime.lastError);
+        } else {
+          ExtensionLogger.info('Default settings initialized');
+        }
+      });
+    }
+  } catch (error) {
+    ExtensionLogger.error('Error during extension installation', error);
+  }
 });
 
-// Cleanup old metrics daily
-chrome.alarms.create('cleanup-metrics', { delayInMinutes: 1440, periodInMinutes: 1440 });
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'cleanup-metrics') {
-    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    
-    chrome.storage.local.get(['metrics'], (result) => {
-      const metrics = result.metrics || [];
-      const filtered = metrics.filter(m => m.timestamp > weekAgo);
-      chrome.storage.local.set({ metrics: filtered });
-    });
+// Handle extension startup
+chrome.runtime.onStartup.addListener(() => {
+  try {
+    ExtensionLogger.info('Extension started');
+  } catch (error) {
+    ExtensionLogger.error('Error during extension startup', error);
   }
+});
+
+// Handle messages from content scripts with error boundaries
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  try {
+    ExtensionLogger.info('Message received', { type: request.type, tabId: sender.tab?.id });
+    
+    switch (request.type) {
+      case 'getSettings':
+        chrome.storage.sync.get(['stickyScrollEnabled', 'scrollSensitivity'], (result) => {
+          if (chrome.runtime.lastError) {
+            ExtensionLogger.error('Failed to get settings', chrome.runtime.lastError);
+            sendResponse({ error: chrome.runtime.lastError.message });
+          } else {
+            sendResponse(result);
+          }
+        });
+        return true; // Async response
+        
+      case 'reportError':
+        ExtensionLogger.error('Content script error', request.error);
+        sendResponse({ received: true });
+        break;
+        
+      default:
+        ExtensionLogger.warn('Unknown message type', { type: request.type });
+        sendResponse({ error: 'Unknown message type' });
+    }
+  } catch (error) {
+    ExtensionLogger.error('Error handling message', error);
+    sendResponse({ error: 'Internal error' });
+  }
+});
+
+// Global error handler
+self.addEventListener('error', (event) => {
+  ExtensionLogger.error('Unhandled error in background script', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno
+  });
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+  ExtensionLogger.error('Unhandled promise rejection', {
+    reason: event.reason?.toString() || 'Unknown rejection'
+  });
 });
