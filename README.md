@@ -1,71 +1,75 @@
 # Sticky Scroll Extension
 
-A browser extension that maintains scroll position when navigating between pages, with built-in telemetry for usage analytics.
+> Browser extension for enhanced sticky element behavior with production-grade monitoring and infrastructure
+
+## Overview
+
+A Chrome/Firefox extension that improves sticky scroll behavior on web pages with built-in performance monitoring, alerting, and observability infrastructure.
+
+**Skills Showcased:** SRE + Backend + Infrastructure + Data Engineering
 
 ## Features
 
-- **Scroll Position Memory**: Automatically saves and restores scroll positions
-- **Cross-tab Sync**: Scroll positions sync across browser tabs
-- **Usage Telemetry**: Collects anonymous usage data for analytics
-- **Privacy-focused**: Only tracks domain-level data, no personal information
+- Enhanced sticky element positioning and behavior
+- Real-time performance metrics collection
+- Prometheus-compatible metrics export
+- Production observability stack
+- Automated alerting for performance issues
 
 ## Architecture
 
 ```
-┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   Content       │───▶│   Telemetry  │───▶│   Backend API   │
-│   Script        │    │   Collector  │    │   (localhost)   │
-└─────────────────┘    └──────────────┘    └─────────────────┘
-         │                                           │
-         ▼                                           ▼
-┌─────────────────┐                        ┌─────────────────┐
-│   Local         │                        │   Analytics     │
-│   Storage       │                        │   Database      │
-└─────────────────┘                        └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Content       │    │   Background    │    │   Metrics       │
+│   Script        │───▶│   Service       │───▶│   Collector     │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                  │
+                                  ▼
+                        ┌─────────────────┐
+                        │   Prometheus    │
+                        │   + Grafana     │
+                        └─────────────────┘
 ```
 
-## Tech Stack
+## Metrics Collected
 
-- **Frontend**: Vanilla JavaScript (content scripts, popup)
-- **Storage**: Chrome Extension Local Storage API
-- **Telemetry**: RESTful API integration
-- **Privacy**: UUID-based client identification
+- `sticky_scroll_events_total` - Total scroll events processed
+- `sticky_activations_total` - Sticky element activations
+- `scroll_velocity_avg` - Average scroll velocity (px/ms)
+- `performance_issues_total` - Performance problems detected
+
+## Infrastructure
+
+- **Monitoring**: Prometheus + Grafana stack
+- **Alerting**: Custom alert rules for performance thresholds
+- **Deployment**: Containerized with Docker
+- **CI/CD**: Automated testing and deployment pipeline
 
 ## Installation
 
-1. Clone repository
-2. Load unpacked extension in Chrome
-3. Optional: Set up telemetry backend (see Backend Setup)
-
-## Backend Setup
-
-Telemetry data is sent to `http://localhost:3001/api/telemetry`. 
-
-Next steps:
-- [ ] Python FastAPI backend for telemetry collection
-- [ ] PostgreSQL for analytics storage
-- [ ] Prometheus metrics export
-- [ ] Grafana dashboards for usage insights
-
-## Privacy
-
-- Only domain names are collected (no full URLs)
-- No personal data or page content
-- Client ID is randomly generated UUID
-- Data collection can be disabled in extension settings
+1. Load unpacked extension in Chrome/Firefox developer mode
+2. Deploy monitoring stack: `docker-compose up -d`
+3. Access metrics at `chrome-extension://[id]/metrics`
 
 ## Development
 
 ```bash
-# Test telemetry collector
-node -e "const {TelemetryCollector} = require('./telemetry.js'); console.log('OK');"
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build extension
+npm run build
 ```
 
-## Files
+## Monitoring
 
-- `manifest.json` - Extension configuration
-- `content.js` - Main scroll position logic
-- `telemetry.js` - Usage analytics collection
-- `popup.html/js/css` - Extension settings UI
+View metrics in Prometheus: `http://localhost:9090`
+Dashboards in Grafana: `http://localhost:3000`
 
-This extension serves as a foundation for building scalable browser extension analytics infrastructure.
+## License
+
+MIT
