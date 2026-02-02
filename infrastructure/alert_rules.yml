@@ -1,0 +1,20 @@
+groups:
+  - name: sticky_scroll_extension
+    rules:
+      - alert: ExtensionHighErrorRate
+        expr: rate(extension_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate in sticky scroll extension"
+          description: "Error rate is {{ $value }} errors per second"
+
+      - alert: ExtensionUsageSpike
+        expr: rate(extension_activations_total[1m]) > 100
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Usage spike detected"
+          description: "{{ $value }} activations per second"
