@@ -1,62 +1,69 @@
-// Basic telemetry collection for sticky scroll usage
-class TelemetryCollector {
-  constructor() {
-    this.endpoint = 'http://localhost:3001/api/telemetry';
-    this.batchSize = 10;
-    this.events = [];
+class CircuitBreaker {
+  constructor(threshold = 5, timeout = 30000) {
+    this.threshold = threshold;
+    this.timeout = timeout;
+    this.failures = 0;
+    this.lastFailTime = 0;
+    this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
   }
 
-  trackScrollStick(url, duration) {
-    const event = {
-      type: 'scroll_stick',
-      timestamp: Date.now(),
-      url: new URL(url).hostname,
-      duration_ms: duration,
-      user_agent: navigator.userAgent.substring(0, 100)
-    };
-    
-    this.events.push(event);
-    
-    if (this.events.length >= this.batchSize) {
-      this.flush();
+  async call(fn) {
+    if (this.state === 'OPEN') {
+      if (Date.now() - this.lastFailTime > this.timeout) {
+        this.state = 'HALF_OPEN';
+      } else {
+        throw new Error('Circuit breaker is OPEN');
+      }
     }
-  }
 
-  async flush() {
-    if (this.events.length === 0) return;
-    
-    const payload = {
-      events: [...this.events],
-      client_id: await this.getClientId()
-    };
-    
     try {
-      await fetch(this.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      this.events = [];
+      const result = await fn();
+      this.reset();
+      return result;
     } catch (error) {
-      console.warn('Telemetry upload failed:', error.message);
+      this.recordFailure();
+      throw error;
     }
   }
 
-  async getClientId() {
-    const result = await chrome.storage.local.get(['clientId']);
-    if (result.clientId) return result.clientId;
-    
-    const clientId = crypto.randomUUID();
-    await chrome.storage.local.set({ clientId });
-    return clientId;
+  recordFailure() {
+    this.failures++;
+    this.lastFailTime = Date.now();
+    if (this.failures >= this.threshold) {
+      this.state = 'OPEN';
+    }
+  }
+
+  reset() {
+    this.failures = 0;
+    this.state = 'CLOSED';
   }
 }
 
-const telemetry = new TelemetryCollector();
+const analyticsBreaker = new CircuitBreaker(3, 60000);
 
-// Auto-flush on page unload
-window.addEventListener('beforeunload', () => telemetry.flush());
+export async function trackEvent(event, data = {}) {
+  try {
+    await analyticsBreaker.call(async () => {
+      const response = await fetch('https://api.analytics.com/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event, data, timestamp: Date.now() })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Analytics API error: ${response.status}`);
+      }
+    });
+  } catch (error) {
+    console.warn('Analytics tracking failed:', error.message);
+    // Store locally for retry
+    await storeFailedEvent(event, data);
+  }
+}
 
-if (typeof module !== 'undefined') {
-  module.exports = { TelemetryCollector };
+async function storeFailedEvent(event, data) {
+  const failed = await chrome.storage.local.get('failedEvents') || { failedEvents: [] };
+  failed.failedEvents.push({ event, data, timestamp: Date.now() });
+  await chrome.storage.local.set({ failedEvents: failed.failedEvents.slice(-50) });
 }
