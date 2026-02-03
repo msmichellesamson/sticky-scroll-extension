@@ -1,31 +1,30 @@
 {
   "manifest_version": 3,
-  "name": "Sticky Scroll Extension",
-  "version": "1.0.0",
-  "description": "Makes scroll positions sticky across page reloads and navigation",
-  
+  "name": "Sticky Scroll Position Extension",
+  "version": "1.2.0",
+  "description": "Remembers scroll positions with advanced analytics",
   "permissions": [
     "storage",
     "activeTab",
-    "alarms"
+    "tabs"
   ],
-  
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js", "analytics.js"],
+    "css": ["content.css"]
+  }],
   "background": {
     "service_worker": "background.js"
   },
-  
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": ["content.js"],
-    "css": ["content.css"],
-    "run_at": "document_end"
-  }],
-  
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Sticky Scroll Settings"
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
-  
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
