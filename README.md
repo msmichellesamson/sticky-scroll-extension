@@ -1,104 +1,73 @@
 # Sticky Scroll Extension
 
-A browser extension that remembers scroll positions across page visits with production-grade monitoring and health checks.
-
-## Features
-
-- **Scroll Position Memory**: Automatically saves and restores scroll positions
-- **Privacy-First**: All data stored locally, no external tracking
-- **Health Monitoring**: Built-in health checks and error tracking
-- **Production Metrics**: Prometheus-compatible monitoring
-- **Cross-Browser**: Works on Chrome, Firefox, Edge
+A Chrome extension that remembers and restores scroll positions across page reloads and navigation.
 
 ## Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Content Script │    │   Background    │    │   Health Monitor│
-│   (scroll track) │◄──►│   (storage)     │◄──►│   (diagnostics) │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Local Storage  │    │   Telemetry     │    │   Prometheus    │
-│  (positions)    │    │   (metrics)     │    │   (alerts)      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Content Script │    │  Background Script │    │     Popup UI    │
+│                 │    │                  │    │                 │
+│ • Scroll detection │  │ • Position storage │  │ • User controls │
+│ • Auto-restore    │◄──┤ • Message routing │◄──┤ • Status display│
+│ • Debounced saves │   │ • Tab management  │    │ • Settings      │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-## Tech Stack
+## Core Components
 
-- **Runtime**: JavaScript (Web Extensions API)
-- **Storage**: Chrome Storage API + Local Storage
-- **Monitoring**: Custom telemetry + Prometheus metrics
-- **Health**: Built-in health monitoring with error tracking
-- **Infrastructure**: Docker + Prometheus alerting
+- **Content Script**: Captures scroll events, restores positions
+- **Background Script**: Manages storage, handles cross-tab communication  
+- **Popup Interface**: User controls and position monitoring
+- **Storage Layer**: Chrome sync storage for persistence
 
-## Quick Start
+## SRE & Observability
 
-1. **Load Extension**:
-   ```bash
-   # Chrome: Load unpacked extension
-   # Firefox: about:debugging > Load Temporary Add-on
-   ```
+### Metrics Collection
+```bash
+# View extension metrics
+chrome://extensions/?id=<extension-id>
+```
 
-2. **Monitor Health**:
-   ```bash
-   # Check extension health in popup
-   # Or via storage: chrome.storage.local.get(['extension_health'])
-   ```
+### Health Monitoring
+- Storage quota usage tracking
+- Error rate monitoring via `analytics.js`
+- Performance metrics in `telemetry.js`
 
-3. **Production Monitoring**:
-   ```bash
-   docker-compose up -d
-   # Prometheus: http://localhost:9090
-   # Alerts configured for error rates
-   ```
+### Infrastructure
+```bash
+# Deploy monitoring stack
+cd infrastructure/
+docker-compose up -d
+```
 
-## Health Monitoring
+## API Reference
 
-The extension includes comprehensive health monitoring:
-
-- **Error Tracking**: Automatic error counting and reporting
-- **Uptime Monitoring**: Tracks extension runtime
-- **Health Status**: Boolean health indicator based on error thresholds
-- **Storage Integration**: Health data accessible via Chrome Storage API
-
-## Files
-
-- `manifest.json` - Extension configuration
-- `content.js` - Scroll position tracking
-- `background.js` - Storage and lifecycle management
-- `popup.js/html/css` - User interface
-- `health.js` - Health monitoring and diagnostics
-- `telemetry.js` - Metrics collection
-- `infrastructure/` - Prometheus monitoring setup
+See [API Documentation](docs/api.md) for complete message protocol and integration examples.
 
 ## Development
 
 ```bash
-# Test health monitoring
-const health = await chrome.storage.local.get(['extension_health']);
-console.log('Extension health:', health.extension_health);
+# Load extension in Chrome
+1. Open chrome://extensions/
+2. Enable Developer mode
+3. Click "Load unpacked" and select project directory
 
-# Monitor errors
-window.addEventListener('error', (e) => console.log('Error tracked:', e));
+# Monitor logs
+chrome://extensions/ → Inspect views: background page
 ```
 
 ## Production Deployment
 
-The extension is designed for production use with:
+- Chrome Web Store submission ready
+- Privacy policy compliant
+- Prometheus monitoring included
+- Error tracking enabled
 
-- Comprehensive error handling
-- Health monitoring and alerting
-- Privacy-compliant data handling
-- Cross-browser compatibility
-- Infrastructure as code (Terraform ready)
+## Technical Stack
 
-## Skills Demonstrated
-
-- **SRE**: Health monitoring, error tracking, uptime measurement
-- **Backend**: Event-driven architecture, storage management
-- **Infrastructure**: Prometheus integration, monitoring setup
-- **DevOps**: Extension packaging, deployment automation
-
-Extension monitors its own health and exposes metrics for production observability.
+- **Frontend**: Vanilla JavaScript (Chrome Extension APIs)
+- **Storage**: Chrome Sync Storage
+- **Monitoring**: Prometheus + Custom metrics
+- **Infrastructure**: Docker Compose
+- **Deployment**: Chrome Web Store
