@@ -1,65 +1,46 @@
 # Sticky Scroll Extension
 
-A browser extension that maintains scroll position when navigating between pages with comprehensive monitoring and alerting.
+Browser extension that maintains scroll position context across page reloads with performance monitoring and reliability features.
 
 ## Architecture
 
-### Components
-- **Content Script**: Manages scroll position persistence across page loads
-- **Background Service**: Handles extension lifecycle and cross-tab communication
-- **Popup Interface**: User settings and status dashboard
-- **Telemetry System**: Performance metrics and error tracking
+- **Content Scripts**: Core scroll position tracking with velocity analysis
+- **Background Service**: State persistence and cross-tab synchronization
+- **Telemetry Pipeline**: Performance metrics collection and monitoring
+- **Infrastructure**: Prometheus monitoring with alerting rules
 
-### Infrastructure
-- **Prometheus**: Metrics collection and storage
-- **Alertmanager**: Alert routing and escalation
-- **Health Monitoring**: Real-time extension status tracking
+## Features
+
+- Automatic scroll position restoration
+- Real-time velocity tracking for scroll behavior analysis
+- Performance monitoring with custom metrics
+- Error tracking and health monitoring
+- Chrome extension store ready
+
+## Technical Stack
+
+- JavaScript (ES6+)
+- Chrome Extension APIs
+- Prometheus metrics
+- Browser performance APIs
+
+## Installation
+
+1. Load unpacked extension in Chrome developer mode
+2. Grant necessary permissions
+3. Optional: Deploy monitoring stack with `infrastructure/`
 
 ## Monitoring
 
-### Metrics Collected
-- Scroll position save/restore success rates
-- Page load performance impact
-- Error rates by browser and page type
-- User engagement and feature adoption
+- Health checks via `health.js`
+- Custom metrics in `metrics.js`
+- Prometheus configuration in `infrastructure/`
+- Performance tracking in `performance.js`
 
-### Alerting
-- **Critical**: Extension crashes, high error rates (>5%)
-- **Warning**: Performance degradation, unusual usage patterns
-- **Escalation**: Critical alerts escalate to on-call, warnings to team email
+## Files
 
-### Alert Channels
-- Email notifications for all severity levels
-- Slack integration for critical alerts
-- Webhook endpoints for custom integrations
-
-## Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Build extension
-npm run build
-
-# Start monitoring stack
-docker-compose -f infrastructure/docker-compose.yml up -d
-
-# Run tests
-npm test
-```
-
-## Configuration
-
-- Prometheus scrapes metrics on `:9090`
-- Alertmanager routes alerts via `:9093`
-- Health endpoint available at `/health`
-
-## Development
-
-- JavaScript ES6+ with Web Extensions API
-- Chrome and Firefox compatible
-- Production monitoring ready
-- Automated testing pipeline
-
-Built for reliability and observability in production browser extension deployments.
+- `content.js` - Main scroll tracking logic
+- `velocity-tracker.js` - Scroll velocity analysis
+- `background.js` - Service worker for persistence
+- `telemetry.js` - Metrics collection
+- `infrastructure/` - Monitoring and alerting setup
