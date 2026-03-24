@@ -1,39 +1,65 @@
 # Sticky Scroll Extension
 
-A Chrome extension that provides intelligent sticky scrolling behavior with enterprise-grade reliability and monitoring.
+A browser extension that maintains scroll position when navigating between pages with comprehensive monitoring and alerting.
 
 ## Architecture
 
-- **Content Script**: DOM manipulation with error recovery
-- **Background Service**: Event handling and telemetry
-- **Popup Interface**: User controls and settings
-- **Error Handling**: Structured errors with retry logic
-- **Monitoring**: Prometheus metrics and health checks
+### Components
+- **Content Script**: Manages scroll position persistence across page loads
+- **Background Service**: Handles extension lifecycle and cross-tab communication
+- **Popup Interface**: User settings and status dashboard
+- **Telemetry System**: Performance metrics and error tracking
 
-## Error Handling
-
-Structured error handling with:
-- Exponential backoff retry logic
-- Context-aware error classification
-- Automatic telemetry logging
-- Storage quota management
+### Infrastructure
+- **Prometheus**: Metrics collection and storage
+- **Alertmanager**: Alert routing and escalation
+- **Health Monitoring**: Real-time extension status tracking
 
 ## Monitoring
 
-- Performance metrics collection
-- Health endpoint monitoring
-- Prometheus integration
-- Alert rules for error rates
+### Metrics Collected
+- Scroll position save/restore success rates
+- Page load performance impact
+- Error rates by browser and page type
+- User engagement and feature adoption
 
-## Installation
+### Alerting
+- **Critical**: Extension crashes, high error rates (>5%)
+- **Warning**: Performance degradation, unusual usage patterns
+- **Escalation**: Critical alerts escalate to on-call, warnings to team email
 
-1. Load as unpacked extension in Chrome
-2. Configure monitoring endpoints
-3. Enable developer mode for telemetry
+### Alert Channels
+- Email notifications for all severity levels
+- Slack integration for critical alerts
+- Webhook endpoints for custom integrations
 
-## Tech Stack
+## Quick Start
 
-- JavaScript (Chrome Extension APIs)
-- Prometheus (metrics)
-- Chrome Storage API
-- DOM manipulation with MutationObserver
+```bash
+# Install dependencies
+npm install
+
+# Build extension
+npm run build
+
+# Start monitoring stack
+docker-compose -f infrastructure/docker-compose.yml up -d
+
+# Run tests
+npm test
+```
+
+## Configuration
+
+- Prometheus scrapes metrics on `:9090`
+- Alertmanager routes alerts via `:9093`
+- Health endpoint available at `/health`
+
+## Development
+
+- JavaScript ES6+ with Web Extensions API
+- Chrome and Firefox compatible
+- Production monitoring ready
+- Automated testing pipeline
+
+Built for reliability and observability in production browser extension deployments.
