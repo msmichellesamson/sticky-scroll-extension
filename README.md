@@ -1,46 +1,97 @@
 # Sticky Scroll Extension
 
-Browser extension that maintains scroll position context across page reloads with performance monitoring and reliability features.
-
-## Architecture
-
-- **Content Scripts**: Core scroll position tracking with velocity analysis
-- **Background Service**: State persistence and cross-tab synchronization
-- **Telemetry Pipeline**: Performance metrics collection and monitoring
-- **Infrastructure**: Prometheus monitoring with alerting rules
+Browser extension for intelligent scroll position management with SRE-grade monitoring.
 
 ## Features
 
-- Automatic scroll position restoration
-- Real-time velocity tracking for scroll behavior analysis
-- Performance monitoring with custom metrics
-- Error tracking and health monitoring
-- Chrome extension store ready
+### Core Functionality
+- **Scroll Persistence**: Maintains scroll positions across page navigation
+- **Velocity Tracking**: Monitors scroll speed and patterns
+- **Performance Monitoring**: Tracks extension performance metrics
+- **Health Checks**: Built-in health monitoring system
+
+### SRE & Observability
+- **Prometheus Integration**: Custom metrics collection
+- **Alerting**: Automated alerts for performance issues
+- **Error Tracking**: Comprehensive error handling and reporting
+- **Telemetry**: User interaction analytics
+
+## Architecture
+
+```
+Content Script ←→ Background Service ←→ Storage
+      ↓               ↓                ↓
+  Performance    Health Monitor    Persistence
+   Tracker         System           Layer
+      ↓               ↓                ↓
+   Metrics      Prometheus        Local Storage
+ Collection       Export           (Chrome)
+```
 
 ## Technical Stack
 
-- JavaScript (ES6+)
-- Chrome Extension APIs
-- Prometheus metrics
-- Browser performance APIs
+- **Runtime**: Chrome Extension Manifest V3
+- **Language**: JavaScript (ES6+)
+- **Storage**: Chrome Storage API
+- **Monitoring**: Prometheus + Alertmanager
+- **Testing**: Jest
+
+## Infrastructure
+
+- `infrastructure/prometheus.yml` - Metrics collection config
+- `infrastructure/alertmanager.yml` - Alert routing
+- `infrastructure/alert_rules.yml` - Performance thresholds
+
+## Files Structure
+
+### Core Extension
+- `manifest.json` - Extension configuration
+- `content.js` - Page interaction logic
+- `background.js` - Service worker
+- `popup.js/html/css` - Extension UI
+
+### Monitoring & SRE
+- `performance.js` - Performance tracking
+- `health.js` - Health check system
+- `metrics.js` - Metrics collection
+- `telemetry.js` - Usage analytics
+- `error-handler.js` - Error management
+
+### Features
+- `scroll-persistence.js` - Scroll position management
+- `velocity-tracker.js` - Scroll behavior analysis
+
+### Infrastructure
+- `infrastructure/` - Monitoring configuration
+- `tests/` - Test suites
 
 ## Installation
 
-1. Load unpacked extension in Chrome developer mode
-2. Grant necessary permissions
-3. Optional: Deploy monitoring stack with `infrastructure/`
+1. Clone repository
+2. Load as unpacked extension in Chrome
+3. Configure Prometheus endpoint (optional)
 
-## Monitoring
+## Development
 
-- Health checks via `health.js`
-- Custom metrics in `metrics.js`
-- Prometheus configuration in `infrastructure/`
-- Performance tracking in `performance.js`
+```bash
+# Run tests
+npm test
 
-## Files
+# Monitor metrics
+docker-compose up prometheus
+```
 
-- `content.js` - Main scroll tracking logic
-- `velocity-tracker.js` - Scroll velocity analysis
-- `background.js` - Service worker for persistence
-- `telemetry.js` - Metrics collection
-- `infrastructure/` - Monitoring and alerting setup
+## Metrics
+
+- `scroll_position_saves_total` - Position save operations
+- `scroll_velocity_avg` - Average scroll speed
+- `extension_errors_total` - Error count
+- `performance_timing_ms` - Operation timings
+
+## Privacy
+
+See `privacy-policy.html` for data handling details.
+
+## License
+
+MIT License - see LICENSE file.
