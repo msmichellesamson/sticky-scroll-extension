@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sticky-scroll-api
+  namespace: sticky-scroll
+  labels:
+    app: sticky-scroll-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sticky-scroll-api
+  template:
+    metadata:
+      labels:
+        app: sticky-scroll-api
+    spec:
+      containers:
+      - name: api
+        image: sticky-scroll/api:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: host
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
