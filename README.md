@@ -1,79 +1,57 @@
-# Sticky Scroll Extension
+# Sticky Scroll Position Extension
 
-Browser extension for intelligent scroll position management with SRE-grade monitoring.
-
-## Features
-
-### Core Functionality
-- **Scroll Persistence**: Maintains scroll positions across page navigation
-- **Velocity Tracking**: Monitors scroll speed and patterns
-- **Performance Monitoring**: Tracks extension performance metrics
-- **Health Checks**: Built-in health monitoring system
-
-### SRE & Observability
-- **Prometheus Integration**: Custom metrics collection
-- **Alerting**: Automated alerts for performance issues
-- **Error Tracking**: Comprehensive error handling and reporting
-- **Telemetry**: User interaction analytics
+Browser extension that remembers and restores scroll positions across page visits with intelligent pattern detection and performance monitoring.
 
 ## Architecture
 
-```
-Content Script ←→ Background Service ←→ Storage
-      ↓               ↓                ↓
-  Performance    Health Monitor    Persistence
-   Tracker         System           Layer
-      ↓               ↓                ↓
-   Metrics      Prometheus        Local Storage
- Collection       Export           (Chrome)
-```
+**Infrastructure Stack:**
+- Prometheus metrics collection
+- Docker containerized data service
+- Alert rules for performance monitoring
+- Production-grade error handling with retry logic
 
-## Technical Stack
+**Core Components:**
+- **Pattern Analyzer**: ML-inspired scroll behavior detection
+- **Velocity Tracker**: Real-time scroll momentum analysis  
+- **Performance Monitor**: Memory and CPU usage tracking
+- **Error Handler**: Structured error reporting with automatic retry
+- **Telemetry**: Privacy-focused usage analytics
 
-- **Runtime**: Chrome Extension Manifest V3
-- **Language**: JavaScript (ES6+)
-- **Storage**: Chrome Storage API
-- **Monitoring**: Prometheus + Alertmanager
-- **Testing**: Jest
+## Key Features
+
+- Intelligent scroll position restoration
+- Performance-optimized storage (< 1MB)
+- Real-time velocity tracking
+- Pattern-based behavior analysis
+- Comprehensive error handling
+- Production monitoring stack
+
+## Error Handling
+
+Robust error management with:
+- Automatic retry logic (3 attempts with backoff)
+- Structured error reporting
+- Critical error detection
+- Buffered error batching
+- Context-aware error tracking
 
 ## Infrastructure
 
-- `infrastructure/prometheus.yml` - Metrics collection config
-- `infrastructure/alertmanager.yml` - Alert routing
-- `infrastructure/alert_rules.yml` - Performance thresholds
-
-## Files Structure
-
-### Core Extension
-- `manifest.json` - Extension configuration
-- `content.js` - Page interaction logic
-- `background.js` - Service worker
-- `popup.js/html/css` - Extension UI
-
-### Monitoring & SRE
-- `performance.js` - Performance tracking
-- `health.js` - Health check system
-- `metrics.js` - Metrics collection
-- `telemetry.js` - Usage analytics
-- `error-handler.js` - Error management
-
-### Features
-- `scroll-persistence.js` - Scroll position management
-- `velocity-tracker.js` - Scroll behavior analysis
-
-### Infrastructure
-- `infrastructure/` - Monitoring configuration
-- `tests/` - Test suites
-
-## Installation
-
-1. Clone repository
-2. Load as unpacked extension in Chrome
-3. Configure Prometheus endpoint (optional)
+```
+infrastructure/
+├── prometheus.yml      # Metrics collection
+├── alertmanager.yml   # Alert routing
+├── alert_rules.yml    # Performance thresholds
+└── docker/
+    └── data-service.dockerfile
+```
 
 ## Development
 
 ```bash
+# Load extension
+chrome://extensions/ -> Developer mode -> Load unpacked
+
 # Run tests
 npm test
 
@@ -81,17 +59,10 @@ npm test
 docker-compose up prometheus
 ```
 
-## Metrics
-
-- `scroll_position_saves_total` - Position save operations
-- `scroll_velocity_avg` - Average scroll speed
-- `extension_errors_total` - Error count
-- `performance_timing_ms` - Operation timings
-
 ## Privacy
 
-See `privacy-policy.html` for data handling details.
+All scroll data stored locally. Optional anonymous telemetry for performance optimization only.
 
-## License
+---
 
-MIT License - see LICENSE file.
+**Skills Demonstrated**: Browser Extension Development, Performance Monitoring, Error Handling, Infrastructure as Code, Observability
