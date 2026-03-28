@@ -1,68 +1,64 @@
-# Sticky Scroll Position Extension
+# Sticky Scroll Extension
 
-Browser extension that remembers and restores scroll positions across page visits with intelligent pattern detection and performance monitoring.
+Browser extension that intelligently preserves scroll positions across page reloads using ML-powered pattern analysis.
 
 ## Architecture
 
-**Infrastructure Stack:**
+### Extension Components
+- **content.js**: Main content script for scroll tracking
+- **background.js**: Service worker for data persistence
+- **popup.js**: Extension popup interface
+- **telemetry.js**: Analytics and behavior tracking
+
+### Backend Services
+- **Data Service**: Telemetry collection and pattern analysis
+- **Health Service**: System monitoring and alerting
+- **ML Pipeline**: Scroll behavior prediction
+
+### Infrastructure
+- **Kubernetes**: Container orchestration
+- **Terraform**: Infrastructure as Code
+- **Prometheus**: Metrics and monitoring
+- **AlertManager**: Incident response
+
+## Skills Demonstrated
+
+**DEVOPS & INFRASTRUCTURE:**
+- Kubernetes deployment with auto-scaling
+- Terraform for GCP resource management
+- Docker multi-stage builds
+- CI/CD pipeline automation
+
+**SRE & MONITORING:**
 - Prometheus metrics collection
-- Docker containerized data service
-- Alert rules for performance monitoring
-- Production-grade error handling with retry logic
+- Custom alerting rules
+- Health check endpoints
+- Performance monitoring
 
-**Core Components:**
-- **Pattern Analyzer**: ML-inspired scroll behavior detection
-- **Velocity Tracker**: Real-time scroll momentum analysis  
-- **Performance Monitor**: Memory and CPU usage tracking
-- **Error Handler**: Structured error reporting with automatic retry
-- **Telemetry**: Privacy-focused usage analytics
+**BACKEND & DATA:**
+- RESTful API design
+- Real-time telemetry processing
+- Pattern analysis algorithms
+- Data persistence strategies
 
-## Key Features
+## Documentation
+- [API Documentation](api-docs.md)
+- [Infrastructure Setup](infrastructure/README.md)
+- [Privacy Policy](privacy-policy.html)
 
-- Intelligent scroll position restoration
-- Performance-optimized storage (< 1MB)
-- Real-time velocity tracking
-- Pattern-based behavior analysis
-- Comprehensive error handling
-- Production monitoring stack
-
-## Error Handling
-
-Robust error management with:
-- Automatic retry logic (3 attempts with backoff)
-- Structured error reporting
-- Critical error detection
-- Buffered error batching
-- Context-aware error tracking
-
-## Infrastructure
-
-```
-infrastructure/
-├── prometheus.yml      # Metrics collection
-├── alertmanager.yml   # Alert routing
-├── alert_rules.yml    # Performance thresholds
-└── docker/
-    └── data-service.dockerfile
-```
-
-## Development
+## Quick Start
 
 ```bash
-# Load extension
-chrome://extensions/ -> Developer mode -> Load unpacked
+# Deploy infrastructure
+cd infrastructure/terraform
+terraform apply
 
-# Run tests
-npm test
-
-# Monitor metrics
-docker-compose up prometheus
+# Build and deploy
+docker build -f infrastructure/docker/data-service.dockerfile .
+kubectl apply -f infrastructure/k8s/
 ```
 
-## Privacy
+## Monitoring
 
-All scroll data stored locally. Optional anonymous telemetry for performance optimization only.
-
----
-
-**Skills Demonstrated**: Browser Extension Development, Performance Monitoring, Error Handling, Infrastructure as Code, Observability
+Access metrics at `http://localhost:9090` (Prometheus)
+View alerts at `http://localhost:9093` (AlertManager)
