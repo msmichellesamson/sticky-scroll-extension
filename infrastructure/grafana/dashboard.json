@@ -1,0 +1,45 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Sticky Scroll Extension Metrics",
+    "tags": ["extension", "performance"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Scroll Events Per Second",
+        "type": "stat",
+        "targets": [{
+          "expr": "rate(scroll_events_total[5m])",
+          "legendFormat": "Events/sec"
+        }],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [{
+          "expr": "extension_memory_usage_bytes",
+          "legendFormat": "Memory (bytes)"
+        }],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Prediction Accuracy",
+        "type": "gauge",
+        "targets": [{
+          "expr": "avg(prediction_accuracy_ratio)",
+          "legendFormat": "Accuracy %"
+        }],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s"
+  }
+}
