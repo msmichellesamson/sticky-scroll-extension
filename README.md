@@ -1,64 +1,83 @@
 # Sticky Scroll Extension
 
-Browser extension that intelligently preserves scroll positions across page reloads using ML-powered pattern analysis.
+A machine learning-powered browser extension that intelligently manages scroll position persistence across page reloads and navigation.
+
+## Features
+
+### Core Functionality
+- **Smart Scroll Persistence**: ML-driven scroll position memory
+- **Adaptive Thresholds**: Learning-based scroll behavior optimization
+- **Pattern Recognition**: Analyzes user scroll patterns for better predictions
+- **Performance Monitoring**: Real-time metrics and telemetry
+- **Cross-Domain Intelligence**: Domain-specific scroll behavior learning
+
+### ML & Data Pipeline
+- **Feature Engineering**: Extract scroll velocity, acceleration, dwell time
+- **Adaptive Learning**: Continuous threshold optimization per domain
+- **Pattern Analysis**: Identify user scroll preferences
+- **Telemetry Collection**: User behavior analytics
+
+### Infrastructure & Monitoring
+- **Kubernetes Deployment**: Scalable data processing service
+- **Prometheus Metrics**: Performance and usage monitoring
+- **Grafana Dashboards**: Real-time analytics visualization
+- **Alert Management**: Proactive issue detection
 
 ## Architecture
 
-### Extension Components
-- **content.js**: Main content script for scroll tracking
-- **background.js**: Service worker for data persistence
-- **popup.js**: Extension popup interface
-- **telemetry.js**: Analytics and behavior tracking
-
-### Backend Services
-- **Data Service**: Telemetry collection and pattern analysis
-- **Health Service**: System monitoring and alerting
-- **ML Pipeline**: Scroll behavior prediction
-
-### Infrastructure
-- **Kubernetes**: Container orchestration
-- **Terraform**: Infrastructure as Code
-- **Prometheus**: Metrics and monitoring
-- **AlertManager**: Incident response
-
-## Skills Demonstrated
-
-**DEVOPS & INFRASTRUCTURE:**
-- Kubernetes deployment with auto-scaling
-- Terraform for GCP resource management
-- Docker multi-stage builds
-- CI/CD pipeline automation
-
-**SRE & MONITORING:**
-- Prometheus metrics collection
-- Custom alerting rules
-- Health check endpoints
-- Performance monitoring
-
-**BACKEND & DATA:**
-- RESTful API design
-- Real-time telemetry processing
-- Pattern analysis algorithms
-- Data persistence strategies
-
-## Documentation
-- [API Documentation](api-docs.md)
-- [Infrastructure Setup](infrastructure/README.md)
-- [Privacy Policy](privacy-policy.html)
-
-## Quick Start
-
-```bash
-# Deploy infrastructure
-cd infrastructure/terraform
-terraform apply
-
-# Build and deploy
-docker build -f infrastructure/docker/data-service.dockerfile .
-kubectl apply -f infrastructure/k8s/
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Browser       │    │   Data Service   │    │   Monitoring    │
+│   Extension     │───▶│   (K8s + GCP)   │───▶│   (Prometheus)  │
+│                 │    │                  │    │                 │
+│ • ML Features   │    │ • Analytics API  │    │ • Grafana       │
+│ • Persistence   │    │ • Pattern Store  │    │ • Alerting      │
+│ • Telemetry     │    │ • Threshold ML   │    │ • Health Checks │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-## Monitoring
+## ML Components
 
-Access metrics at `http://localhost:9090` (Prometheus)
-View alerts at `http://localhost:9093` (AlertManager)
+### Adaptive Threshold Learning
+- Domain-specific scroll threshold optimization
+- User satisfaction feedback integration
+- Continuous learning with 10% learning rate
+- Minimum 10 samples before threshold adjustment
+
+### Pattern Analysis
+- Scroll velocity and acceleration tracking
+- Dwell time analysis for content engagement
+- Cross-page behavior correlation
+- Predictive scroll position inference
+
+## Tech Stack
+
+- **Frontend**: JavaScript ES6+, Chrome Extension APIs
+- **Infrastructure**: Terraform, GCP, Kubernetes
+- **Monitoring**: Prometheus, Grafana, AlertManager
+- **Data**: Pattern analysis, ML feature engineering
+- **DevOps**: Docker, GitOps deployment automation
+
+## Performance Metrics
+
+- Scroll prediction accuracy: Target >85%
+- Response latency: <50ms for position restore
+- Memory usage: <5MB per tab
+- Learning convergence: <100 samples per domain
+
+## Installation
+
+1. Load unpacked extension in Chrome
+2. Grant required permissions
+3. Extension automatically starts learning scroll patterns
+
+## Privacy
+
+- All data processing happens locally
+- Optional anonymous telemetry for improvement
+- No personal information collected
+- Full data export/import capabilities
+
+---
+
+**Skills Demonstrated**: ML/AI (adaptive learning), Infrastructure (K8s, Terraform), DevOps (monitoring), Data Engineering (feature extraction), Backend (analytics API)
