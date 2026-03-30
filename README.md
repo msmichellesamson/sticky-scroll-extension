@@ -1,83 +1,73 @@
 # Sticky Scroll Extension
 
-A machine learning-powered browser extension that intelligently manages scroll position persistence across page reloads and navigation.
+Intelligent browser extension that preserves scroll positions using ML-based pattern recognition and infrastructure monitoring.
 
 ## Features
 
-### Core Functionality
-- **Smart Scroll Persistence**: ML-driven scroll position memory
-- **Adaptive Thresholds**: Learning-based scroll behavior optimization
-- **Pattern Recognition**: Analyzes user scroll patterns for better predictions
-- **Performance Monitoring**: Real-time metrics and telemetry
-- **Cross-Domain Intelligence**: Domain-specific scroll behavior learning
-
-### ML & Data Pipeline
-- **Feature Engineering**: Extract scroll velocity, acceleration, dwell time
-- **Adaptive Learning**: Continuous threshold optimization per domain
-- **Pattern Analysis**: Identify user scroll preferences
-- **Telemetry Collection**: User behavior analytics
-
-### Infrastructure & Monitoring
-- **Kubernetes Deployment**: Scalable data processing service
-- **Prometheus Metrics**: Performance and usage monitoring
-- **Grafana Dashboards**: Real-time analytics visualization
-- **Alert Management**: Proactive issue detection
+- **Smart Scroll Persistence**: ML-powered scroll position restoration
+- **Velocity Tracking**: Real-time scroll velocity analysis
+- **Pattern Recognition**: Adaptive scrolling behavior detection
+- **Production Monitoring**: Full observability with Prometheus/Grafana
+- **Infrastructure as Code**: Terraform + Kubernetes deployment
+- **Performance Analytics**: Extension health and usage metrics
 
 ## Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Browser       │    │   Data Service   │    │   Monitoring    │
-│   Extension     │───▶│   (K8s + GCP)   │───▶│   (Prometheus)  │
-│                 │    │                  │    │                 │
-│ • ML Features   │    │ • Analytics API  │    │ • Grafana       │
-│ • Persistence   │    │ • Pattern Store  │    │ • Alerting      │
-│ • Telemetry     │    │ • Threshold ML   │    │ • Health Checks │
+│   Browser Ext   │────│   Data Service   │────│   Monitoring    │
+│  - Content JS   │    │  - Go Backend    │    │  - Prometheus   │
+│  - Background   │    │  - PostgreSQL    │    │  - Grafana      │
+│  - ML Features  │    │  - Redis Cache   │    │  - AlertManager │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-## ML Components
+## Skills Demonstrated
 
-### Adaptive Threshold Learning
-- Domain-specific scroll threshold optimization
-- User satisfaction feedback integration
-- Continuous learning with 10% learning rate
-- Minimum 10 samples before threshold adjustment
+- **AI/ML**: Pattern recognition, adaptive thresholds, feature extraction
+- **Backend**: Go microservice with gRPC, REST APIs
+- **Database**: PostgreSQL for analytics, Redis for caching
+- **Infrastructure**: Terraform, Kubernetes, Docker
+- **SRE**: Prometheus metrics, Grafana dashboards, alerting
+- **DevOps**: Container deployment, monitoring pipeline
 
-### Pattern Analysis
-- Scroll velocity and acceleration tracking
-- Dwell time analysis for content engagement
-- Cross-page behavior correlation
-- Predictive scroll position inference
+## Quick Start
 
-## Tech Stack
+```bash
+# Deploy infrastructure
+cd infrastructure/terraform
+terraform apply
 
-- **Frontend**: JavaScript ES6+, Chrome Extension APIs
-- **Infrastructure**: Terraform, GCP, Kubernetes
-- **Monitoring**: Prometheus, Grafana, AlertManager
-- **Data**: Pattern analysis, ML feature engineering
-- **DevOps**: Docker, GitOps deployment automation
+# Build extension
+npm run build
 
-## Performance Metrics
+# Load in Chrome
+chrome://extensions/ → Load unpacked
+```
 
-- Scroll prediction accuracy: Target >85%
-- Response latency: <50ms for position restore
-- Memory usage: <5MB per tab
-- Learning convergence: <100 samples per domain
+## API Documentation
 
-## Installation
+See [API Documentation](docs/api.md) for detailed browser extension APIs.
 
-1. Load unpacked extension in Chrome
-2. Grant required permissions
-3. Extension automatically starts learning scroll patterns
+## Monitoring
 
-## Privacy
+- Grafana: http://localhost:3000
+- Prometheus: http://localhost:9090
+- Health endpoint: http://localhost:8080/health
 
-- All data processing happens locally
-- Optional anonymous telemetry for improvement
-- No personal information collected
-- Full data export/import capabilities
+## Development
 
----
+```bash
+# Run tests
+npm test
 
-**Skills Demonstrated**: ML/AI (adaptive learning), Infrastructure (K8s, Terraform), DevOps (monitoring), Data Engineering (feature extraction), Backend (analytics API)
+# Build for production
+npm run build:prod
+
+# Deploy monitoring
+kubectl apply -f infrastructure/k8s/
+```
+
+## License
+
+MIT
