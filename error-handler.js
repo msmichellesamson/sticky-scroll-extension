@@ -1,87 +1,72 @@
-class ExtensionErrorHandler {
+class ErrorHandler {
   constructor() {
+    this.retryAttempts = new Map();
     this.maxRetries = 3;
-    this.retryDelay = 1000;
-    this.errorBuffer = [];
-    this.flushInterval = 30000;
-    
-    this.startErrorFlush();
+    this.baseDelay = 1000;
   }
 
-  async handleError(error, context = {}) {
+  async handleWithRetry(operation, context = '') {
+    const key = `${operation.name}_${context}`;
+    const attempts = this.retryAttempts.get(key) || 0;
+    
+    try {
+      const result = await operation();
+      this.retryAttempts.delete(key); // Reset on success
+      return result;
+    } catch (error) {
+      if (attempts >= this.maxRetries) {
+        this.retryAttempts.delete(key);
+        throw new Error(`Operation failed after ${this.maxRetries} retries: ${error.message}`);
+      }
+
+      const delay = this.baseDelay * Math.pow(2, attempts);
+      this.retryAttempts.set(key, attempts + 1);
+      
+      console.warn(`Retry attempt ${attempts + 1}/${this.maxRetries} for ${key} in ${delay}ms`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return this.handleWithRetry(operation, context);
+    }
+  }
+
+  logError(error, context = '') {
+    const timestamp = new Date().toISOString();
     const errorData = {
-      timestamp: Date.now(),
+      timestamp,
       message: error.message,
       stack: error.stack,
       context,
-      url: window.location?.href,
-      userAgent: navigator.userAgent
+      url: window.location?.href || 'unknown'
     };
-
-    this.errorBuffer.push(errorData);
     
-    // Log to console for debugging
-    console.error('[StickyScroll]', errorData);
+    console.error('ScrollExtension Error:', errorData);
     
-    // Critical errors bypass buffer
-    if (this.isCriticalError(error)) {
-      await this.reportError(errorData);
+    // Send to background script for telemetry
+    if (chrome?.runtime?.sendMessage) {
+      chrome.runtime.sendMessage({
+        type: 'error',
+        data: errorData
+      }).catch(() => {}); // Ignore if background unavailable
     }
   }
 
-  async withRetry(operation, context) {
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-      try {
-        return await operation();
-      } catch (error) {
-        if (attempt === this.maxRetries) {
-          await this.handleError(error, { ...context, finalAttempt: true });
-          throw error;
-        }
-        
-        await new Promise(resolve => 
-          setTimeout(resolve, this.retryDelay * attempt)
-        );
-      }
-    }
-  }
-
-  isCriticalError(error) {
-    const criticalPatterns = [
-      /permission/i,
-      /network/i,
-      /storage/i,
-      /manifest/i
+  isRetriableError(error) {
+    const retriableErrors = [
+      'NetworkError',
+      'TimeoutError',
+      'Failed to fetch',
+      'Connection refused'
     ];
     
-    return criticalPatterns.some(pattern => 
-      pattern.test(error.message)
+    return retriableErrors.some(pattern => 
+      error.message.includes(pattern)
     );
-  }
-
-  async reportError(errorData) {
-    try {
-      await chrome.runtime.sendMessage({
-        type: 'ERROR_REPORT',
-        data: errorData
-      });
-    } catch (e) {
-      console.error('[StickyScroll] Failed to report error:', e);
-    }
-  }
-
-  startErrorFlush() {
-    setInterval(async () => {
-      if (this.errorBuffer.length > 0) {
-        const errors = this.errorBuffer.splice(0);
-        await this.reportError({ batch: errors });
-      }
-    }, this.flushInterval);
-  }
-
-  clearErrors() {
-    this.errorBuffer = [];
   }
 }
 
-window.extensionErrorHandler = new ExtensionErrorHandler();
+const errorHandler = new ErrorHandler();
+
+// Export for module usage
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ErrorHandler, errorHandler };
+}
