@@ -1,101 +1,84 @@
 # Sticky Scroll Extension
 
-An intelligent browser extension that learns user scroll patterns and provides adaptive scroll persistence with ML-powered behavior detection.
+## Overview
+Browser extension that provides intelligent sticky scroll behavior using ML-based pattern recognition and adaptive thresholds.
 
 ## Architecture
 
+### Core Components
+- **Content Script**: Main scroll detection and persistence logic
+- **Background Service**: Coordinates ML inference and data collection
+- **ML Pipeline**: Pattern classification and anomaly detection
+- **Infrastructure**: Kubernetes-based ML serving with observability
+
+### Key Features
+- ✅ ML-powered scroll pattern detection
+- ✅ Adaptive threshold adjustment
+- ✅ Performance monitoring with Prometheus
+- ✅ Redis-based state persistence
+- ✅ Error handling with retry logic
+- ✅ Real-time anomaly detection
+
+## Technology Stack
+
+**Frontend**: JavaScript (Chrome Extension APIs)
+**ML Services**: Python (FastAPI, scikit-learn)
+**Infrastructure**: Terraform, Kubernetes, Redis
+**Observability**: Prometheus, Grafana, AlertManager
+**Database**: Redis for session state
+
+## Infrastructure
+
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│  Browser Ext    │◄──►│   Data Services  │◄──►│  Infrastructure │
-│                 │    │                  │    │                 │
-│ • Content Script│    │ • Pattern Class. │    │ • Redis Cluster │
-│ • ML Features   │    │ • Scroll Class.  │    │ • Prometheus    │
-│ • Persistence   │    │ • Anomaly Detect │    │ • Grafana       │
-│ • Analytics     │    │                  │    │ • Kubernetes    │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+├── ML Services (Python)
+│   ├── scroll-classifier.py     # Pattern classification
+│   ├── pattern-classifier.py    # Behavior analysis
+│   └── anomaly-detector.py      # Outlier detection
+├── Kubernetes Deployment
+│   ├── deployment.yaml          # ML service pods
+│   ├── service.yaml            # Load balancing
+│   └── redis.yaml              # State storage
+└── Monitoring Stack
+    ├── prometheus.yml           # Metrics collection
+    ├── alert_rules.yml         # SRE alerting
+    └── grafana/dashboard.json  # Visualization
 ```
 
-## Skills Demonstrated
+## Error Handling
+- Exponential backoff retry logic for network operations
+- Comprehensive error logging with context
+- Graceful degradation when ML services unavailable
+- Telemetry collection for reliability monitoring
 
-**AI/ML + Data Engineering:**
-- Real-time scroll pattern classification with scikit-learn
-- Anomaly detection using Isolation Forest
-- Feature extraction from user behavior streams
-- ML model serving with Redis-backed inference
+## Performance
+- Sub-10ms scroll event processing
+- Efficient viewport calculations
+- Memory-conscious pattern storage
+- Redis caching for ML predictions
 
-**Infrastructure + SRE:**
-- Kubernetes deployment with Redis cluster
-- Prometheus metrics and Grafana dashboards
-- Terraform infrastructure as code
-- Health checks and observability
-
-**Backend + Database:**
-- Python microservices with async Redis
-- Real-time data pipeline architecture
-- Time-series data storage and querying
-
-## Services
-
-### Browser Extension
-- **Content Script**: Captures scroll events, calculates velocity/acceleration
-- **ML Features**: Extracts behavioral patterns for classification
-- **Persistence**: Saves/restores scroll positions intelligently
-- **Analytics**: Real-time telemetry and performance monitoring
-
-### Data Services
-- **Pattern Classifier**: ML service for scroll behavior categorization
-- **Scroll Classifier**: Predicts optimal scroll positions
-- **Anomaly Detector**: Real-time detection of unusual scroll patterns
-
-### Infrastructure
-- **Redis**: Event streaming and feature store
-- **Prometheus**: Metrics collection and alerting
-- **Grafana**: Real-time dashboards and visualization
-- **Kubernetes**: Container orchestration and scaling
-
-## Quick Start
+## Deployment
 
 ```bash
-# Deploy infrastructure
+# Infrastructure provisioning
 cd infrastructure/terraform
 terraform init && terraform apply
 
-# Start services
+# Kubernetes deployment
 kubectl apply -f infrastructure/k8s/
 
-# Load extension in Chrome
-# 1. Open chrome://extensions/
-# 2. Enable Developer mode
-# 3. Click "Load unpacked" and select this directory
+# Extension installation
+# Load unpacked extension from project root
 ```
 
 ## Monitoring
+- **Metrics**: Scroll latency, ML inference time, error rates
+- **Alerts**: Service availability, performance degradation
+- **Dashboards**: Real-time performance and usage analytics
 
-- **Grafana**: http://localhost:3000 (admin/admin)
-- **Prometheus**: http://localhost:9090
-- **Redis Metrics**: Available via Prometheus exporters
-
-## Key Features
-
-- **Adaptive Learning**: ML models learn individual user patterns
-- **Real-time Classification**: Sub-100ms scroll behavior categorization
-- **Anomaly Detection**: Identifies unusual scrolling patterns
-- **Production Monitoring**: Full observability stack
-- **Scalable Architecture**: Kubernetes-ready microservices
-
-## Technical Highlights
-
-- Isolation Forest anomaly detection with 0.1 contamination rate
-- Redis Streams for real-time event processing
-- Prometheus metrics with custom alerting rules
-- Terraform modules for reproducible infrastructure
-- Async Python services with proper error handling
-
-## Performance
-
-- < 1ms scroll event processing
-- < 100ms ML inference latency
-- Redis cluster handles 10k+ events/second
-- Auto-scaling based on CPU/memory metrics
-
-Built with: Python, JavaScript, Redis, Kubernetes, Terraform, Prometheus, Grafana
+## Skills Demonstrated
+- **ML/AI**: Pattern classification, anomaly detection, feature engineering
+- **Infrastructure**: Kubernetes, Terraform, cloud-native architecture
+- **SRE**: Prometheus monitoring, alerting, reliability engineering
+- **Backend**: FastAPI services, Redis integration, distributed systems
+- **DevOps**: Container orchestration, infrastructure as code
+- **Database**: Redis optimization, data persistence patterns
