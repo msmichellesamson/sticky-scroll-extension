@@ -1,84 +1,71 @@
 # Sticky Scroll Extension
 
-## Overview
-Browser extension that provides intelligent sticky scroll behavior using ML-based pattern recognition and adaptive thresholds.
+A Chrome extension that uses ML to predict user scroll intent and provide intelligent scroll persistence across page loads.
 
 ## Architecture
 
 ### Core Components
-- **Content Script**: Main scroll detection and persistence logic
-- **Background Service**: Coordinates ML inference and data collection
-- **ML Pipeline**: Pattern classification and anomaly detection
-- **Infrastructure**: Kubernetes-based ML serving with observability
+- **Extension**: Chrome extension with content scripts for scroll behavior detection
+- **ML Pipeline**: Real-time scroll pattern analysis and intent prediction
+- **Infrastructure**: Kubernetes-based microservices with observability
 
 ### Key Features
-- ✅ ML-powered scroll pattern detection
-- ✅ Adaptive threshold adjustment
-- ✅ Performance monitoring with Prometheus
-- ✅ Redis-based state persistence
-- ✅ Error handling with retry logic
-- ✅ Real-time anomaly detection
+- Scroll position persistence with smart restore
+- ML-based scroll intent prediction (reading/scanning/seeking)
+- Real-time pattern analysis and anomaly detection
+- Performance monitoring and adaptive thresholds
 
-## Technology Stack
+## Services
 
-**Frontend**: JavaScript (Chrome Extension APIs)
-**ML Services**: Python (FastAPI, scikit-learn)
-**Infrastructure**: Terraform, Kubernetes, Redis
-**Observability**: Prometheus, Grafana, AlertManager
-**Database**: Redis for session state
+### ML Services
+- `scroll-classifier.py`: Classifies scroll behaviors into patterns
+- `pattern-classifier.py`: Advanced pattern recognition
+- `anomaly-detector.py`: Detects unusual scroll behaviors
+- `intent-predictor.py`: Predicts user scroll intent from behavior patterns
 
-## Infrastructure
-
-```
-├── ML Services (Python)
-│   ├── scroll-classifier.py     # Pattern classification
-│   ├── pattern-classifier.py    # Behavior analysis
-│   └── anomaly-detector.py      # Outlier detection
-├── Kubernetes Deployment
-│   ├── deployment.yaml          # ML service pods
-│   ├── service.yaml            # Load balancing
-│   └── redis.yaml              # State storage
-└── Monitoring Stack
-    ├── prometheus.yml           # Metrics collection
-    ├── alert_rules.yml         # SRE alerting
-    └── grafana/dashboard.json  # Visualization
-```
-
-## Error Handling
-- Exponential backoff retry logic for network operations
-- Comprehensive error logging with context
-- Graceful degradation when ML services unavailable
-- Telemetry collection for reliability monitoring
-
-## Performance
-- Sub-10ms scroll event processing
-- Efficient viewport calculations
-- Memory-conscious pattern storage
-- Redis caching for ML predictions
-
-## Deployment
-
-```bash
-# Infrastructure provisioning
-cd infrastructure/terraform
-terraform init && terraform apply
-
-# Kubernetes deployment
-kubectl apply -f infrastructure/k8s/
-
-# Extension installation
-# Load unpacked extension from project root
-```
-
-## Monitoring
-- **Metrics**: Scroll latency, ML inference time, error rates
-- **Alerts**: Service availability, performance degradation
-- **Dashboards**: Real-time performance and usage analytics
+### Monitoring Stack
+- Prometheus metrics collection
+- Grafana dashboards for scroll analytics
+- AlertManager for performance degradation
 
 ## Skills Demonstrated
-- **ML/AI**: Pattern classification, anomaly detection, feature engineering
-- **Infrastructure**: Kubernetes, Terraform, cloud-native architecture
-- **SRE**: Prometheus monitoring, alerting, reliability engineering
-- **Backend**: FastAPI services, Redis integration, distributed systems
-- **DevOps**: Container orchestration, infrastructure as code
-- **Database**: Redis optimization, data persistence patterns
+- **ML/AI**: Real-time behavior classification, intent prediction, feature engineering
+- **Infrastructure**: Kubernetes deployment, Terraform IaC, Redis caching
+- **Backend**: Microservices architecture, async Python services
+- **Database**: Redis for real-time data, metric storage
+- **DevOps**: Container orchestration, monitoring stack
+- **SRE**: Prometheus metrics, alerting, observability
+
+## Quick Start
+
+```bash
+# Deploy infrastructure
+cd infrastructure/terraform
+terraform apply
+
+# Deploy services
+kubectl apply -f infrastructure/k8s/
+
+# Load extension in Chrome
+# Navigate to chrome://extensions/
+# Enable Developer Mode
+# Click "Load unpacked" and select this directory
+```
+
+## Metrics
+- Scroll event processing latency
+- Intent prediction accuracy
+- Pattern classification metrics
+- Performance impact on web pages
+
+## Development
+
+```bash
+# Run ML services locally
+python infrastructure/services/intent-predictor.py
+
+# Run tests
+npm test
+```
+
+Built with: Python, JavaScript, Kubernetes, Redis, Prometheus, Terraform
