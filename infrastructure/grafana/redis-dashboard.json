@@ -1,0 +1,82 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Redis Performance - Scroll Extension",
+    "tags": ["redis", "scroll-extension"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Redis Memory Usage",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes{job=\"redis\"}",
+            "legendFormat": "Memory Used"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 800000000},
+                {"color": "red", "value": 1000000000}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Command Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(redis_commands_total{job=\"redis\"}[5m])",
+            "legendFormat": "{{cmd}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "yAxes": [
+          {"label": "ops/sec", "show": true}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Connected Clients",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "redis_connected_clients{job=\"redis\"}",
+            "legendFormat": "Clients"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Keyspace Hits/Misses",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(redis_keyspace_hits_total{job=\"redis\"}[5m])",
+            "legendFormat": "Hits"
+          },
+          {
+            "expr": "rate(redis_keyspace_misses_total{job=\"redis\"}[5m])",
+            "legendFormat": "Misses"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 18, "x": 6, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}
