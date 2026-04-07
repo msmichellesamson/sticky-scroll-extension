@@ -1,0 +1,63 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Redis Performance - Scroll Extension",
+    "tags": ["redis", "scroll-extension"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Redis Memory Usage",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes{job=\"redis\"}",
+            "legendFormat": "Used Memory"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Commands Per Second",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(redis_commands_total{job=\"redis\"}[5m])",
+            "legendFormat": "{{cmd}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Connection Count",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "redis_connected_clients{job=\"redis\"}",
+            "legendFormat": "Clients"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Key Expiration Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(redis_expired_keys_total{job=\"redis\"}[5m])",
+            "legendFormat": "Expired Keys/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}
