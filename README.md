@@ -1,70 +1,44 @@
 # Sticky Scroll Extension
 
-Intelligent browser extension that uses ML to predict and enhance scroll behavior through infrastructure-backed analytics.
+A browser extension that uses ML to predict and maintain optimal scroll positions with intelligent behavior detection.
 
 ## Architecture
 
-### Core Components
-- **Browser Extension**: JavaScript-based extension with ML feature extraction
-- **Infrastructure Services**: Python ML services for scroll pattern analysis
-- **Data Pipeline**: Real-time scroll behavior processing and prediction
-- **Monitoring**: Prometheus + Grafana observability stack
+- **Frontend**: Browser extension (JavaScript)
+- **Backend**: Python ML services on Kubernetes
+- **Database**: PostgreSQL for model storage, Redis for caching
+- **Infrastructure**: Terraform + GCP, Prometheus monitoring
 
-### ML Services
-- `scroll-intent-predictor.py`: Predicts user scroll intentions
-- `pattern-classifier.py`: Classifies scroll patterns and behaviors  
-- `scroll-classifier.py`: Categorizes scroll types (reading, skimming, searching)
-- `anomaly-detector.py`: Detects unusual scroll behaviors
-- `velocity-predictor.py`: Predicts future scroll velocity and momentum
-- `intent-predictor.py`: Advanced intent prediction with confidence scoring
+## Skills Demonstrated
 
-### Infrastructure
-- **Kubernetes**: Service orchestration and scaling
-- **Terraform**: Infrastructure as Code for GCP deployment
-- **Redis**: Real-time data caching and session storage
-- **Prometheus**: Metrics collection and alerting
-- **Grafana**: Visualization and monitoring dashboards
+- **AI/ML**: Real-time scroll prediction, behavioral pattern analysis
+- **Infrastructure**: Terraform, Kubernetes, cloud architecture
+- **SRE**: Prometheus metrics, Grafana dashboards, alerting
+- **Backend**: Microservices, distributed ML inference
+- **Database**: PostgreSQL optimization, Redis caching
+- **DevOps**: Container orchestration, monitoring
 
-## Key Features
+## Services
 
-### Extension Capabilities
-- Real-time scroll behavior analysis
-- Adaptive scroll position persistence
-- ML-based scroll intent prediction
-- Performance monitoring and telemetry
-- Privacy-first data collection
-
-### Backend Intelligence
-- Velocity prediction with confidence scoring
-- Pattern recognition and classification
-- Anomaly detection for unusual behaviors
-- Adaptive thresholding based on user patterns
-
-## Deployment
-
-```bash
-# Deploy infrastructure
-cd infrastructure/terraform
-terraform init && terraform apply
-
-# Deploy services to Kubernetes
-kubectl apply -f infrastructure/k8s/
-
-# Load browser extension
-# Chrome: Load unpacked extension from project root
+```
+scroll-intent-predictor.py    # ML model for scroll behavior
+velocity-predictor.py         # Velocity-based predictions
+pattern-classifier.py         # User pattern analysis
+anomalv-detector.py           # Anomaly detection service
 ```
 
 ## Monitoring
 
-- **Metrics**: Prometheus endpoints on all services
-- **Dashboards**: Grafana dashboards for scroll analytics
-- **Alerts**: Automated alerting for service health and anomalies
-- **Health Checks**: Comprehensive service health monitoring
+- **Grafana Dashboards**: ML model performance, Redis metrics, PostgreSQL storage
+- **Prometheus**: Custom metrics, SLI/SLO tracking
+- **Alerting**: Model drift, performance degradation
 
-## Privacy
+## Deployment
 
-All scroll data is processed locally in the browser with anonymous telemetry sent to backend services. No personally identifiable information is collected or stored.
+```bash
+# Infrastructure
+terraform -chdir=infrastructure/terraform apply
 
-## License
-
-MIT License - see LICENSE file for details.
+# Services
+kubectl apply -f infrastructure/k8s/
+```
