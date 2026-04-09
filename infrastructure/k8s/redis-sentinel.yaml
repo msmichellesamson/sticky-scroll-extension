@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-sentinel
+  namespace: sticky-scroll
+  labels:
+    app: redis-sentinel
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis-sentinel
+  template:
+    metadata:
+      labels:
+        app: redis-sentinel
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+    spec:
+      containers:
+      - name: redis-sentinel
+        image: redis:7-alpine
+        command:
+        - redis-sentinel
+        - /etc/redis/sentinel.conf
+        ports:
+        - containerPort: 26379
+        volumeMounts:
+        - name: config
+          mountPath: /etc/redis
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+      - name: redis-exporter
+        image: oliver006/redis_exporter:latest
+        ports:
+        - containerPort: 9121
+        env:
+        - name: REDIS_ADDR
+          value: "redis://localhost:26379"
+        resources:
+          limits:
+            memory: "32Mi"
+            cpu: "10m"
+      volumes:
+      - name: config
+        configMap:
+          name: redis-sentinel-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-sentinel-config
+  namespace: sticky-scroll
+data:
+  sentinel.conf: |
+    port 26379
+    sentinel monitor redis-master redis-master 6379 2
+    sentinel down-after-milliseconds redis-master 5000
+    sentinel failover-timeout redis-master 10000
+    sentinel parallel-syncs redis-master 1
