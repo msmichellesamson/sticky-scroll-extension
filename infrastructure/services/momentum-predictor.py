@@ -1,129 +1,118 @@
 #!/usr/bin/env python3
 
+import asyncio
+import json
+import logging
+from typing import Dict, List, Optional
 import numpy as np
 from dataclasses import dataclass
-from typing import List, Optional
-import redis
-import json
-from sklearn.linear_model import LinearRegression
-from flask import Flask, request, jsonify
-import logging
+from redis import Redis
+from prometheus_client import Counter, Histogram, start_http_server
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-redis_client = redis.Redis(host='redis', port=6379, db=0)
+# Metrics
+PREDICTIONS_TOTAL = Counter('momentum_predictions_total', 'Total momentum predictions')
+PREDICTION_TIME = Histogram('momentum_prediction_duration_seconds', 'Time spent on predictions')
+MOMENTUM_SCORE = Histogram('momentum_score', 'Predicted momentum scores', buckets=[0.1, 0.3, 0.5, 0.7, 0.9, 1.0])
 
 @dataclass
-class ScrollData:
+class ScrollEvent:
     timestamp: float
     position: float
     velocity: float
     acceleration: float
+    direction: str
 
 class MomentumPredictor:
-    def __init__(self):
-        self.model = LinearRegression()
-        self.is_trained = False
-        self.min_samples = 10
-    
-    def predict_momentum(self, scroll_history: List[ScrollData]) -> dict:
-        """Predict scroll momentum and stopping position"""
-        if len(scroll_history) < 3:
-            return {"momentum": 0.0, "predicted_stop": 0.0, "confidence": 0.0}
+    def __init__(self, redis_client: Redis):
+        self.redis = redis_client
+        self.momentum_threshold = 0.6
+        self.velocity_decay = 0.85
         
-        # Calculate momentum score based on velocity consistency
-        velocities = [s.velocity for s in scroll_history[-5:]]
-        accelerations = [s.acceleration for s in scroll_history[-5:]]
-        
-        momentum = self._calculate_momentum(velocities, accelerations)
-        predicted_stop = self._predict_stop_position(scroll_history)
-        confidence = self._calculate_confidence(scroll_history)
-        
-        return {
-            "momentum": momentum,
-            "predicted_stop": predicted_stop,
-            "confidence": confidence,
-            "decay_rate": self._calculate_decay_rate(velocities)
-        }
-    
-    def _calculate_momentum(self, velocities: List[float], accelerations: List[float]) -> float:
-        """Calculate momentum score (0-1)"""
+    def calculate_momentum(self, events: List[ScrollEvent]) -> float:
+        """Calculate scroll momentum based on velocity patterns"""
+        if len(events) < 2:
+            return 0.0
+            
+        # Calculate velocity consistency
+        velocities = [abs(event.velocity) for event in events[-5:]]
         if not velocities:
             return 0.0
+            
+        avg_velocity = np.mean(velocities)
+        velocity_std = np.std(velocities) if len(velocities) > 1 else 0
         
-        avg_velocity = abs(np.mean(velocities))
-        velocity_consistency = 1.0 - (np.std(velocities) / (abs(np.mean(velocities)) + 1e-6))
+        # Momentum is high when velocity is consistent and above threshold
+        consistency = 1.0 - min(velocity_std / max(avg_velocity, 1), 1.0)
+        intensity = min(avg_velocity / 1000.0, 1.0)  # Normalize velocity
         
-        # Higher momentum for consistent high velocity
-        momentum = min(avg_velocity / 1000.0, 1.0) * max(velocity_consistency, 0.0)
-        return float(np.clip(momentum, 0.0, 1.0))
+        momentum = (consistency * 0.7) + (intensity * 0.3)
+        return min(momentum, 1.0)
     
-    def _predict_stop_position(self, history: List[ScrollData]) -> float:
-        """Predict where scrolling will stop"""
-        if len(history) < 2:
-            return history[-1].position if history else 0.0
+    def predict_continuation(self, momentum: float, current_velocity: float) -> Dict:
+        """Predict if scrolling will continue based on momentum"""
+        will_continue = momentum > self.momentum_threshold and abs(current_velocity) > 50
         
-        current = history[-1]
-        if abs(current.velocity) < 10:  # Already slow
-            return current.position
-        
-        # Simple physics: v = v0 + at, assume deceleration
-        decel_rate = -0.8  # Estimated deceleration
-        time_to_stop = -current.velocity / decel_rate if decel_rate != 0 else 0
-        
-        predicted_stop = current.position + (current.velocity * time_to_stop + 0.5 * decel_rate * time_to_stop**2)
-        return float(predicted_stop)
+        # Predict stopping distance
+        if will_continue:
+            stopping_distance = abs(current_velocity) * 2.5 * momentum
+        else:
+            stopping_distance = abs(current_velocity) * 0.5
+            
+        return {
+            'will_continue': will_continue,
+            'momentum_score': momentum,
+            'stopping_distance': stopping_distance,
+            'confidence': momentum * 0.8 + (0.2 if will_continue else 0)
+        }
     
-    def _calculate_confidence(self, history: List[ScrollData]) -> float:
-        """Calculate prediction confidence"""
-        if len(history) < 3:
-            return 0.0
-        
-        # Higher confidence with more data and consistent patterns
-        data_factor = min(len(history) / 20.0, 1.0)
-        
-        velocities = [s.velocity for s in history[-5:]]
-        velocity_stability = 1.0 - (np.std(velocities) / (abs(np.mean(velocities)) + 1e-6))
-        
-        return float(np.clip(data_factor * max(velocity_stability, 0.0), 0.0, 1.0))
-    
-    def _calculate_decay_rate(self, velocities: List[float]) -> float:
-        """Calculate how quickly momentum is decaying"""
-        if len(velocities) < 2:
-            return 0.0
-        
-        # Calculate velocity change rate
-        changes = [velocities[i] - velocities[i-1] for i in range(1, len(velocities))]
-        return float(np.mean(changes)) if changes else 0.0
+    async def process_scroll_data(self, user_id: str, scroll_data: Dict) -> Dict:
+        """Process scroll events and predict momentum"""
+        with PREDICTION_TIME.time():
+            try:
+                events = []
+                for event_data in scroll_data.get('events', []):
+                    events.append(ScrollEvent(
+                        timestamp=event_data['timestamp'],
+                        position=event_data['position'],
+                        velocity=event_data.get('velocity', 0),
+                        acceleration=event_data.get('acceleration', 0),
+                        direction=event_data.get('direction', 'down')
+                    ))
+                
+                momentum = self.calculate_momentum(events)
+                current_velocity = events[-1].velocity if events else 0
+                
+                prediction = self.predict_continuation(momentum, current_velocity)
+                
+                # Store prediction in Redis
+                key = f"momentum:{user_id}"
+                await self.redis.setex(key, 300, json.dumps(prediction))  # 5min TTL
+                
+                PREDICTIONS_TOTAL.inc()
+                MOMENTUM_SCORE.observe(momentum)
+                
+                logger.info(f"Momentum prediction for {user_id}: {momentum:.3f}")
+                return prediction
+                
+            except Exception as e:
+                logger.error(f"Momentum prediction error: {e}")
+                return {'error': str(e), 'momentum_score': 0.0}
 
-predictor = MomentumPredictor()
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        data = request.json
-        scroll_history = [
-            ScrollData(**item) for item in data.get('scroll_history', [])
-        ]
-        
-        prediction = predictor.predict_momentum(scroll_history)
-        
-        # Cache prediction
-        cache_key = f"momentum:{data.get('session_id', 'default')}"
-        redis_client.setex(cache_key, 60, json.dumps(prediction))
-        
-        logger.info(f"Momentum prediction: {prediction['momentum']:.3f}")
-        return jsonify(prediction)
+async def main():
+    # Start Prometheus metrics server
+    start_http_server(8003)
     
-    except Exception as e:
-        logger.error(f"Prediction error: {e}")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({"status": "healthy", "model_trained": predictor.is_trained})
+    redis_client = Redis(host='redis-service', port=6379, decode_responses=True)
+    predictor = MomentumPredictor(redis_client)
+    
+    logger.info("Momentum predictor service started on port 8003")
+    
+    # Keep service running
+    while True:
+        await asyncio.sleep(60)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5004, debug=False)
+    asyncio.run(main())
