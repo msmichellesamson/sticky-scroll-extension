@@ -1,61 +1,106 @@
 class ErrorHandler {
   constructor() {
-    this.retryAttempts = new Map();
-    this.maxRetries = 3;
-    this.backoffMs = 1000;
-  }
-
-  async withRetry(operation, context = 'unknown') {
-    const key = `${context}-${Date.now()}`;
-    let attempt = 0;
-
-    while (attempt < this.maxRetries) {
-      try {
-        return await operation();
-      } catch (error) {
-        attempt++;
-        this.retryAttempts.set(key, attempt);
-        
-        if (attempt >= this.maxRetries) {
-          this.logError(error, context, attempt);
-          throw new Error(`Failed after ${attempt} attempts: ${error.message}`);
-        }
-
-        const delay = this.backoffMs * Math.pow(2, attempt - 1);
-        await this.sleep(delay);
-      }
-    }
-  }
-
-  logError(error, context, attempts) {
-    const errorData = {
-      message: error.message,
-      stack: error.stack,
-      context,
-      attempts,
-      timestamp: Date.now()
+    this.errorCategories = {
+      NETWORK: 'network',
+      STORAGE: 'storage',
+      PERMISSION: 'permission',
+      ML_MODEL: 'ml_model',
+      PERFORMANCE: 'performance',
+      USER_INPUT: 'user_input'
     };
     
-    console.error('[ScrollExtension] Error:', errorData);
+    this.recoveryStrategies = new Map();
+    this.initializeStrategies();
+  }
+
+  initializeStrategies() {
+    this.recoveryStrategies.set(this.errorCategories.NETWORK, {
+      retryCount: 3,
+      backoffMs: 1000,
+      fallback: () => this.enableOfflineMode()
+    });
     
-    // Send to background for telemetry
-    chrome.runtime?.sendMessage({
-      type: 'error',
-      data: errorData
-    }).catch(() => {});
+    this.recoveryStrategies.set(this.errorCategories.STORAGE, {
+      retryCount: 2,
+      backoffMs: 500,
+      fallback: () => this.useMemoryStorage()
+    });
+    
+    this.recoveryStrategies.set(this.errorCategories.ML_MODEL, {
+      retryCount: 1,
+      backoffMs: 2000,
+      fallback: () => this.useFallbackPrediction()
+    });
+  }
+
+  categorizeError(error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      return this.errorCategories.NETWORK;
+    }
+    if (error.message.includes('storage') || error.name === 'QuotaExceededError') {
+      return this.errorCategories.STORAGE;
+    }
+    if (error.message.includes('permission') || error.name === 'NotAllowedError') {
+      return this.errorCategories.PERMISSION;
+    }
+    if (error.message.includes('model') || error.message.includes('prediction')) {
+      return this.errorCategories.ML_MODEL;
+    }
+    if (error.name === 'PerformanceError') {
+      return this.errorCategories.PERFORMANCE;
+    }
+    return this.errorCategories.USER_INPUT;
+  }
+
+  async handleWithRecovery(error, context = {}) {
+    const category = this.categorizeError(error);
+    const strategy = this.recoveryStrategies.get(category);
+    
+    if (!strategy) {
+      console.error(`No recovery strategy for category: ${category}`, error);
+      return { success: false, error };
+    }
+
+    for (let attempt = 1; attempt <= strategy.retryCount; attempt++) {
+      try {
+        if (context.retryFn) {
+          const result = await context.retryFn();
+          return { success: true, result, attempt };
+        }
+        break;
+      } catch (retryError) {
+        if (attempt === strategy.retryCount) {
+          console.warn(`All retries failed for ${category}, using fallback`);
+          const fallbackResult = await strategy.fallback();
+          return { success: true, result: fallbackResult, usedFallback: true };
+        }
+        await this.sleep(strategy.backoffMs * attempt);
+      }
+    }
+    
+    return { success: false, error, category };
+  }
+
+  async enableOfflineMode() {
+    console.log('Enabling offline mode for scroll predictions');
+    return { mode: 'offline', predictions: [] };
+  }
+
+  async useMemoryStorage() {
+    console.log('Falling back to memory-only storage');
+    return new Map();
+  }
+
+  async useFallbackPrediction() {
+    console.log('Using simple heuristic prediction');
+    return { confidence: 0.5, prediction: 'continue' };
   }
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-
-  getRetryStats() {
-    return {
-      totalRetries: this.retryAttempts.size,
-      avgRetries: Array.from(this.retryAttempts.values()).reduce((a, b) => a + b, 0) / this.retryAttempts.size || 0
-    };
-  }
 }
 
-const errorHandler = new ErrorHandler();
-export default errorHandler;
+if (typeof module !== 'undefined') {
+  module.exports = ErrorHandler;
+}
