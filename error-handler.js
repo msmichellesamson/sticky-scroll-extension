@@ -1,99 +1,59 @@
 class ErrorHandler {
   constructor() {
-    this.errorCategories = {
-      NETWORK: 'network',
-      STORAGE: 'storage',
-      PERMISSION: 'permission',
-      ML_MODEL: 'ml_model',
-      PERFORMANCE: 'performance',
-      USER_INPUT: 'user_input'
-    };
-    
-    this.recoveryStrategies = new Map();
-    this.initializeStrategies();
+    this.maxRetries = 3;
+    this.baseDelay = 1000;
+    this.maxDelay = 10000;
   }
 
-  initializeStrategies() {
-    this.recoveryStrategies.set(this.errorCategories.NETWORK, {
-      retryCount: 3,
-      backoffMs: 1000,
-      fallback: () => this.enableOfflineMode()
-    });
+  async withRetry(operation, context = '') {
+    let lastError;
     
-    this.recoveryStrategies.set(this.errorCategories.STORAGE, {
-      retryCount: 2,
-      backoffMs: 500,
-      fallback: () => this.useMemoryStorage()
-    });
-    
-    this.recoveryStrategies.set(this.errorCategories.ML_MODEL, {
-      retryCount: 1,
-      backoffMs: 2000,
-      fallback: () => this.useFallbackPrediction()
-    });
-  }
-
-  categorizeError(error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      return this.errorCategories.NETWORK;
-    }
-    if (error.message.includes('storage') || error.name === 'QuotaExceededError') {
-      return this.errorCategories.STORAGE;
-    }
-    if (error.message.includes('permission') || error.name === 'NotAllowedError') {
-      return this.errorCategories.PERMISSION;
-    }
-    if (error.message.includes('model') || error.message.includes('prediction')) {
-      return this.errorCategories.ML_MODEL;
-    }
-    if (error.name === 'PerformanceError') {
-      return this.errorCategories.PERFORMANCE;
-    }
-    return this.errorCategories.USER_INPUT;
-  }
-
-  async handleWithRecovery(error, context = {}) {
-    const category = this.categorizeError(error);
-    const strategy = this.recoveryStrategies.get(category);
-    
-    if (!strategy) {
-      console.error(`No recovery strategy for category: ${category}`, error);
-      return { success: false, error };
-    }
-
-    for (let attempt = 1; attempt <= strategy.retryCount; attempt++) {
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       try {
-        if (context.retryFn) {
-          const result = await context.retryFn();
-          return { success: true, result, attempt };
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        
+        if (attempt === this.maxRetries) {
+          this.logError(error, context, attempt + 1);
+          throw error;
         }
-        break;
-      } catch (retryError) {
-        if (attempt === strategy.retryCount) {
-          console.warn(`All retries failed for ${category}, using fallback`);
-          const fallbackResult = await strategy.fallback();
-          return { success: true, result: fallbackResult, usedFallback: true };
+        
+        if (!this.isRetryableError(error)) {
+          this.logError(error, context, attempt + 1);
+          throw error;
         }
-        await this.sleep(strategy.backoffMs * attempt);
+        
+        const delay = this.calculateDelay(attempt);
+        console.warn(`Retry attempt ${attempt + 1}/${this.maxRetries + 1} for ${context} after ${delay}ms`);
+        await this.sleep(delay);
       }
     }
     
-    return { success: false, error, category };
+    throw lastError;
   }
 
-  async enableOfflineMode() {
-    console.log('Enabling offline mode for scroll predictions');
-    return { mode: 'offline', predictions: [] };
+  isRetryableError(error) {
+    if (error.name === 'NetworkError') return true;
+    if (error.message?.includes('timeout')) return true;
+    if (error.status >= 500 && error.status < 600) return true;
+    if (error.status === 429) return true; // Rate limit
+    return false;
   }
 
-  async useMemoryStorage() {
-    console.log('Falling back to memory-only storage');
-    return new Map();
+  calculateDelay(attempt) {
+    const delay = this.baseDelay * Math.pow(2, attempt);
+    const jitter = Math.random() * 0.1 * delay;
+    return Math.min(delay + jitter, this.maxDelay);
   }
 
-  async useFallbackPrediction() {
-    console.log('Using simple heuristic prediction');
-    return { confidence: 0.5, prediction: 'continue' };
+  logError(error, context, attempt) {
+    console.error(`Error in ${context} (attempt ${attempt}):`, {
+      name: error.name,
+      message: error.message,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n'),
+      timestamp: new Date().toISOString()
+    });
   }
 
   sleep(ms) {
@@ -101,6 +61,8 @@ class ErrorHandler {
   }
 }
 
-if (typeof module !== 'undefined') {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = ErrorHandler;
+} else if (typeof window !== 'undefined') {
+  window.ErrorHandler = ErrorHandler;
 }
