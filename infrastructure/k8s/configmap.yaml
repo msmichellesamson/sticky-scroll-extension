@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-services-config
+  namespace: sticky-scroll
+data:
+  REDIS_HOST: "redis-sentinel-service"
+  REDIS_PORT: "26379"
+  REDIS_SENTINEL_MASTER: "redis-master"
+  POSTGRES_HOST: "postgresql-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "scroll_patterns"
+  MODEL_CACHE_TTL: "3600"
+  PREDICTION_TIMEOUT: "100"
+  ANOMALY_THRESHOLD: "0.85"
+  PATTERN_WINDOW_SIZE: "50"
+  VELOCITY_HISTORY_SIZE: "20"
+  CONFIDENCE_MIN_THRESHOLD: "0.7"
+  METRICS_COLLECTION_INTERVAL: "30"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_PORT: "8080"
+  HEALTH_CHECK_INTERVAL: "10"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ml-services-secret
+  namespace: sticky-scroll
+type: Opaque
+data:
+  POSTGRES_USER: cG9zdGdyZXM=  # postgres
+  POSTGRES_PASSWORD: c2VjdXJlcGFzcw==  # securepass
+  REDIS_PASSWORD: cmVkaXNwYXNz  # redispass
