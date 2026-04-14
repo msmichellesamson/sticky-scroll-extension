@@ -1,82 +1,59 @@
 # Sticky Scroll Extension
 
-> AI-powered browser extension that predicts and maintains optimal scroll positions using machine learning and advanced behavioral analysis.
+Browser extension that uses ML to predict and restore optimal scroll positions across page visits.
 
-## Architecture Overview
+## Architecture
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Browser       │    │   ML Pipeline   │    │ Infrastructure  │
-│   Extension     │◄──►│   Services      │◄──►│   (GCP/K8s)    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+### Core Components
+- **Content Script**: DOM interaction and scroll capture
+- **Background Service**: Event coordination and data persistence
+- **ML Pipeline**: Pattern analysis and position prediction
+- **Infrastructure**: Kubernetes-based model serving
 
-## Key Components
+### Error Handling
+- Circuit breaker pattern for API resilience
+- Exponential backoff retry logic for transient failures
+- Comprehensive error logging with context
 
-### 🧠 ML/AI Features
-- **Intent Prediction**: Real-time scroll behavior classification
-- **Velocity Tracking**: Advanced momentum-based predictions
-- **Pattern Analysis**: User behavior clustering and anomaly detection
-- **Adaptive Thresholds**: Dynamic adjustment based on user patterns
+### ML Features
+- Scroll velocity tracking and momentum prediction
+- User behavior pattern classification
+- Confidence scoring for position predictions
+- Real-time model serving via Python microservices
 
-### 🏗️ Infrastructure
-- **Kubernetes**: Service orchestration and auto-scaling
-- **Terraform**: Infrastructure as code (GCP)
-- **Redis Sentinel**: High-availability caching
-- **PostgreSQL**: Telemetry and pattern storage
-
-### 📊 SRE/Observability
+### Infrastructure
+- **Kubernetes**: Model serving and Redis clustering
+- **Terraform**: GCP resource provisioning
 - **Prometheus**: Metrics collection and alerting
-- **Grafana**: ML model performance dashboards
-- **Circuit Breakers**: Fault tolerance and degradation
-- **Health Checks**: Service reliability monitoring
+- **Grafana**: ML model and infrastructure dashboards
 
-### 🔧 Backend Services
-- **gRPC APIs**: High-performance model serving
-- **Data Pipelines**: Real-time feature engineering
-- **Error Handling**: Exponential backoff and retry logic
-- **Performance Monitoring**: Sub-10ms prediction latency
+### Tech Stack
+- **Frontend**: Vanilla JavaScript (Chrome Extension API)
+- **Backend**: Python microservices (FastAPI)
+- **ML**: scikit-learn, pandas, numpy
+- **Storage**: Redis Sentinel cluster, PostgreSQL
+- **Infra**: GCP, Kubernetes, Terraform
+- **Monitoring**: Prometheus, Grafana, AlertManager
 
-## Technical Stack
-
-- **Languages**: Python (ML services), JavaScript (extension), Go (planned)
-- **ML**: TensorFlow, scikit-learn, feature stores
-- **Infrastructure**: GCP, Kubernetes, Terraform
-- **Databases**: PostgreSQL, Redis
-- **Monitoring**: Prometheus, Grafana, Alertmanager
-
-## Recent Updates
-
-- ✅ Added retry logic with exponential backoff to error handler
-- ✅ Implemented ML feature extraction pipeline
-- ✅ Added circuit breaker for service resilience
-- ✅ Created Grafana dashboards for model monitoring
-- ✅ Set up Kubernetes deployment with Redis Sentinel
-
-## Performance Metrics
-
-- **Prediction Latency**: < 10ms
-- **Model Accuracy**: 94.2% (scroll intent classification)
-- **Extension Overhead**: < 2MB memory, < 1% CPU
-- **Infrastructure**: 99.9% uptime SLA
-
-## Development
+## Quick Start
 
 ```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
 # Deploy infrastructure
 cd infrastructure/terraform
 terraform apply
 
-# Deploy services
+# Deploy to Kubernetes
 kubectl apply -f infrastructure/k8s/
+
+# Load extension in Chrome
+# 1. Navigate to chrome://extensions/
+# 2. Enable Developer mode
+# 3. Click "Load unpacked" and select this directory
 ```
 
-## License
-
-MIT
+## Production Features
+- Adaptive confidence thresholds
+- Circuit breaker protection
+- Health monitoring and alerting
+- Multi-cluster Redis Sentinel
+- Zero-downtime model updates
