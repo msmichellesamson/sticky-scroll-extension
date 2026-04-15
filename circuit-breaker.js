@@ -1,73 +1,71 @@
 class CircuitBreaker {
-  constructor(failureThreshold = 5, recoveryTimeout = 30000, retryAttempts = 3) {
-    this.failureThreshold = failureThreshold;
-    this.recoveryTimeout = recoveryTimeout;
-    this.retryAttempts = retryAttempts;
+  constructor(options = {}) {
+    this.failureThreshold = options.failureThreshold || 5;
+    this.resetTimeout = options.resetTimeout || 60000;
+    this.maxBackoff = options.maxBackoff || 300000;
+    this.backoffMultiplier = options.backoffMultiplier || 2;
+    
+    this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
     this.failureCount = 0;
     this.lastFailureTime = null;
-    this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+    this.nextAttemptTime = null;
+    this.currentBackoff = this.resetTimeout;
   }
 
-  async execute(operation, operationName = 'unknown') {
+  async execute(operation, ...args) {
     if (this.state === 'OPEN') {
-      if (Date.now() - this.lastFailureTime > this.recoveryTimeout) {
-        this.state = 'HALF_OPEN';
-        console.log(`[CircuitBreaker] Attempting recovery for ${operationName}`);
-      } else {
-        throw new Error(`Circuit breaker OPEN for ${operationName}`);
+      if (Date.now() < this.nextAttemptTime) {
+        throw new Error(`Circuit breaker OPEN. Next attempt in ${this.nextAttemptTime - Date.now()}ms`);
       }
+      this.state = 'HALF_OPEN';
     }
 
-    return this.executeWithRetry(operation, operationName);
-  }
-
-  async executeWithRetry(operation, operationName) {
-    let lastError;
-    
-    for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
-      try {
-        const result = await operation();
-        this.onSuccess();
-        return result;
-      } catch (error) {
-        lastError = error;
-        console.warn(`[CircuitBreaker] Attempt ${attempt}/${this.retryAttempts} failed for ${operationName}:`, error.message);
-        
-        if (attempt < this.retryAttempts) {
-          await this.delay(Math.pow(2, attempt) * 100); // Exponential backoff
-        }
-      }
+    try {
+      const result = await operation(...args);
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
     }
-    
-    this.onFailure(operationName);
-    throw lastError;
   }
 
   onSuccess() {
     this.failureCount = 0;
     this.state = 'CLOSED';
+    this.currentBackoff = this.resetTimeout;
+    this.nextAttemptTime = null;
   }
 
-  onFailure(operationName) {
+  onFailure() {
     this.failureCount++;
     this.lastFailureTime = Date.now();
     
     if (this.failureCount >= this.failureThreshold) {
       this.state = 'OPEN';
-      console.error(`[CircuitBreaker] Circuit opened for ${operationName} after ${this.failureCount} failures`);
+      this.currentBackoff = Math.min(
+        this.currentBackoff * this.backoffMultiplier,
+        this.maxBackoff
+      );
+      this.nextAttemptTime = Date.now() + this.currentBackoff;
     }
-  }
-
-  delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   getState() {
     return {
       state: this.state,
       failureCount: this.failureCount,
-      lastFailureTime: this.lastFailureTime
+      nextAttemptTime: this.nextAttemptTime,
+      currentBackoff: this.currentBackoff
     };
+  }
+
+  reset() {
+    this.state = 'CLOSED';
+    this.failureCount = 0;
+    this.lastFailureTime = null;
+    this.nextAttemptTime = null;
+    this.currentBackoff = this.resetTimeout;
   }
 }
 
