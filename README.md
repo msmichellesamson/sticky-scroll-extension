@@ -1,111 +1,62 @@
 # Sticky Scroll Extension
 
-AI-powered browser extension that predicts and adapts to user scroll behavior using machine learning and real-time pattern analysis.
+Browser extension that provides intelligent scroll position memory and predictive scrolling using ML-powered momentum analysis.
 
-## 🎯 Architecture Overview
+## Architecture
 
-**Tech Stack**: JavaScript (extension) + Python (ML services) + PostgreSQL + Redis + Kubernetes
+### Core Components
+- **Content Script**: Tracks scroll behavior and applies intelligent positioning
+- **ML Services**: Python-based prediction services for scroll momentum and intent
+- **Infrastructure**: Kubernetes deployment with Redis caching and PostgreSQL storage
 
-```
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  Extension  │───▶│  ML Services │───▶│  Analytics  │
-│ (Frontend)  │    │  (Backend)   │    │ (Database)  │
-└─────────────┘    └──────────────┘    └─────────────┘
-       │                    │                   │
-       ▼                    ▼                   ▼
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  Content    │    │     Redis    │    │ Prometheus  │
-│  Analysis   │    │   (Cache)    │    │ (Metrics)   │
-└─────────────┘    └──────────────┘    └─────────────┘
-```
+### Key Features
+- **Momentum Prediction**: Physics-based scroll position forecasting
+- **Pattern Recognition**: ML clustering of scroll behaviors
+- **Adaptive Thresholds**: Dynamic confidence scoring
+- **Circuit Breaker**: Reliability patterns for external services
 
-## 🚀 Core Features
+## ML Services
 
-- **Intent Prediction**: ML models predict user scroll intentions
-- **Velocity Tracking**: Real-time scroll speed analysis and prediction
-- **Pattern Recognition**: Behavioral clustering (skim/read/search/browse)
-- **Adaptive Thresholds**: Dynamic adjustment based on user patterns
-- **Circuit Breaker**: Fault tolerance for ML service failures
-- **Telemetry Pipeline**: Comprehensive metrics and observability
+### Recently Added
+- `momentum-calculator.py` - Calculates scroll momentum and predicts future positions using velocity and acceleration data
 
-## 📁 Project Structure
+### Existing Services
+- `velocity-predictor.py` - Predicts scroll velocity patterns
+- `scroll-intent-predictor.py` - Classifies user scroll intentions
+- `pattern-clusterer.py` - Groups similar scroll behaviors
+- `anomaly-detector.py` - Detects unusual scroll patterns
 
-```
-├── Extension Code
-│   ├── content.js          # Main content script
-│   ├── background.js       # Service worker
-│   ├── popup.{js,html}     # Extension popup
-│   └── ml-features.js      # Feature extraction
-│
-├── ML Services (Python)
-│   ├── intent-predictor.py     # Scroll intention ML model
-│   ├── velocity-predictor.py   # Speed prediction service
-│   ├── pattern-classifier.py   # Behavior classification
-│   └── anomaly-detector.py     # Outlier detection
-│
-├── Infrastructure
-│   ├── terraform/          # GCP infrastructure as code
-│   ├── k8s/               # Kubernetes manifests
-│   ├── grafana/           # Observability dashboards
-│   └── docker/            # Container definitions
-│
-└── Tests
-    ├── ml-features.test.js     # Feature extraction tests
-    ├── pattern-analyzer.test.js # Pattern recognition tests
-    └── viewport-calculator.test.js # Viewport logic tests
-```
+## Infrastructure
 
-## 🛠 Technical Implementation
+**Technologies**: Kubernetes, Terraform, Redis Sentinel, PostgreSQL, Prometheus
+**Observability**: Grafana dashboards, Prometheus metrics, structured logging
+**Reliability**: Circuit breakers, health checks, graceful degradation
 
-### ML Pipeline
-- **Feature Store**: Real-time scroll behavior features
-- **Model Serving**: Containerized Python services with Redis caching
-- **Inference**: <50ms prediction latency with circuit breaker fallbacks
-
-### Infrastructure
-- **Kubernetes**: Auto-scaling ML services on GCP GKE
-- **Observability**: Prometheus metrics + Grafana dashboards
-- **Data Layer**: PostgreSQL for analytics + Redis for real-time cache
-
-### Extension Architecture
-- **Content Script**: DOM interaction and scroll event capture
-- **Background Worker**: ML service communication and caching
-- **Performance**: <5ms overhead per scroll event
-
-## 📊 Metrics & Monitoring
-
-- **Prediction Accuracy**: >85% intent prediction accuracy
-- **Latency**: <50ms ML inference time
-- **Reliability**: 99.9% uptime with circuit breaker protection
-- **Performance**: <2% CPU impact on browser
-
-See `docs/api.md` for detailed API documentation.
-
-## 🧪 Development
+## Deployment
 
 ```bash
-# Install extension dependencies
-npm install
-
-# Run tests
-npm test
-
 # Deploy infrastructure
 cd infrastructure/terraform
 terraform apply
 
-# Deploy ML services
-kubectl apply -f infrastructure/k8s/
+# Deploy services
+kubectl apply -f k8s/
 ```
 
-## 🎯 Skills Demonstrated
+## Skills Demonstrated
+- **AI/ML**: Momentum prediction, pattern clustering, anomaly detection
+- **Infrastructure**: Kubernetes orchestration, Terraform IaC
+- **Backend**: Microservices architecture, Redis caching
+- **Data Engineering**: Real-time scroll event processing
+- **SRE**: Circuit breakers, monitoring, alerting
+- **DevOps**: Container orchestration, GitOps deployment
 
-- **AI/ML**: Real-time inference, feature engineering, model serving
-- **Backend**: Microservices, APIs, distributed caching
-- **Infrastructure**: Kubernetes, Terraform, auto-scaling
-- **SRE**: Circuit breakers, observability, fault tolerance
-- **Database**: PostgreSQL analytics, Redis caching, query optimization
-- **DevOps**: Containerization, GitOps, monitoring
-- **Data**: Real-time pipelines, feature stores, telemetry
+## Development
 
-Built for production scale with enterprise-grade reliability and observability.
+```bash
+# Run tests
+npm test
+
+# Start local ML services
+docker-compose up -d
+```
